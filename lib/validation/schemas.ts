@@ -103,6 +103,20 @@ export const studentSchema = z.object({
   admissionNumber: z.string().trim().min(1, 'Enter an admission number.').max(40),
 });
 
+export const importStudentsSchema = z.object({
+  classId: z.uuid('Choose a class.'),
+  groupId: z.uuid().nullable(),
+  students: z
+    .array(
+      z.object({
+        fullName: z.string().trim().min(2).max(120),
+        admissionNumber: z.string().trim().min(1).max(40),
+      }),
+    )
+    .min(1, 'There are no ready rows to import.')
+    .max(500, 'Import at most 500 students at a time.'),
+});
+
 export const assessmentSchema = z.object({
   classId: z.uuid('Choose a class.'),
   subjectId: z.uuid('Choose a subject.'),

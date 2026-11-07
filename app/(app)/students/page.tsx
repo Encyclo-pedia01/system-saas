@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 import { ClassForm, ClassGroupsForm, StudentForm, type ClassOption } from '@/components/students/student-forms';
+import { StudentUpload } from '@/components/students/student-upload';
 import { SubjectForm, TermForm } from '@/components/students/setup-forms';
 import { EmptyState } from '@/components/ui/empty-state';
 import { GlassCard } from '@/components/ui/glass-card';
@@ -46,6 +47,14 @@ export default async function StudentsPage() {
             {classes.length === 0 ? <p className="text-sm text-[var(--muted)]">Add a class first.</p> : <StudentForm classes={classes} />}
           </GlassCard>
         </div>
+      )}
+
+      {canManage && classes.length > 0 && (
+        <GlassCard className="p-6">
+          <h2 className="mb-1 text-lg font-semibold">Upload students from a file</h2>
+          <p className="mb-5 text-sm text-[var(--muted)]">Pick the class (and group, if it has one), then choose a file. You&apos;ll see a preview before anything is saved.</p>
+          <StudentUpload classes={classes} />
+        </GlassCard>
       )}
 
       {canManage && (

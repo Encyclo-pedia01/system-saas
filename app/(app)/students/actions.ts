@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server';
 import {
   classGroupsSchema,
   classSchema,
+  importStudentsSchema,
   parseGroupNames,
   studentSchema,
   subjectSchema,
@@ -91,6 +92,86 @@ export async function addClassGroupsAction(
 
   revalidatePath('/students');
   return success(`Groups added to the class.`);
+}
+
+export async function importStudentsAction(
+  _previous: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await resolveWriteContext(['owner']);
+  if (!guard.ok) return failure(guard.message);
+
+  let payload: unknown;
+  try {
+    payload = JSON.parse(String(formData.get('students') ?? '[]'));
+  } catch {
+    return failure('The upload could not be read. Upload the file again.');
+  }
+
+  const rawGroup = String(formData.get('groupId') ?? '');
+  const parsed = importStudentsSchema.safeParse({
+    classId: formData.get('classId'),
+    groupId: rawGroup === '' ? null : rawGroup,
+    students: payload,
+  });
+  if (!parsed.success) return fromZodError(parsed.error);
+
+  const supabase = await createClient();
+  const institutionId = guard.context.institutionId;
+
+  const { data: schoolClass, error: classError } = await supabase
+    .from('classes')
+    .select('id, has_groups')
+    .eq('id', parsed.data.classId)
+    .eq('institution_id', institutionId)
+    .maybeSingle();
+
+  if (classError) return databaseFailure(classError, 'Could not read the class.');
+  if (!schoolClass) return failure('Choose a class from the list.');
+
+  if (schoolClass.has_groups && !parsed.data.groupId) {
+    return failure('This class has groups. Choose a group for these students.');
+  }
+
+  if (!schoolClass.has_groups && parsed.data.groupId) {
+    return failure('This class has no groups.');
+  }
+
+  const admissionNumbers = parsed.data.students.map((s) => s.admissionNumber);
+  const { data: existing, error: existingError } = await supabase
+    .from('students')
+    .select('admission_number')
+    .eq('institution_id', institutionId)
+    .in('admission_number', admissionNumbers);
+
+  if (existingError) return databaseFailure(existingError, 'Could not check existing students.');
+
+  const taken = new Set((existing ?? []).map((row) => row.admission_number.toLowerCase()));
+  const fresh = parsed.data.students.filter((s) => !taken.has(s.admissionNumber.toLowerCase()));
+
+  if (fresh.length === 0) {
+    return failure('All of these students are already enrolled, so nothing was imported.');
+  }
+
+  const { error } = await supabase.from('students').insert(
+    fresh.map((s) => ({
+      institution_id: institutionId,
+      class_id: parsed.data.classId,
+      group_id: parsed.data.groupId,
+      full_name: s.fullName,
+      admission_number: s.admissionNumber,
+    })),
+  );
+
+  if (error) return databaseFailure(error, 'Could not import the students. Nothing was saved.');
+
+  const skipped = parsed.data.students.length - fresh.length;
+  revalidatePath('/students');
+  return success(
+    skipped > 0
+      ? `Imported ${fresh.length} students. Skipped ${skipped} already enrolled.`
+      : `Imported ${fresh.length} students.`,
+  );
 }
 
 export async function createStudentAction(
