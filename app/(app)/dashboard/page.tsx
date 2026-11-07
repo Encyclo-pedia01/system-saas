@@ -6,6 +6,7 @@ import { GlassCard } from '@/components/ui/glass-card';
 import { requireSchoolViewer } from '@/lib/auth/viewer';
 import { createClient } from '@/lib/supabase/server';
 
+import { PageHeader } from '@/components/ui/page-header';
 export async function generateMetadata(): Promise<Metadata> {
   const viewer = await requireSchoolViewer();
 
@@ -61,13 +62,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <header>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-soft)]">Overview</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="mt-1 text-sm text-[var(--muted)]">
-          {viewer.institution?.name} · {today}
-        </p>
-      </header>
+      <PageHeader eyebrow="Overview" title="Dashboard" description={<>{viewer.institution?.name} · {today}</>} />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Summary">
         <StatCard label="Students" value={studentCount.count ?? 0} hint="Enrolled across all classes" />

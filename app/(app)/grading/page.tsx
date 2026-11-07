@@ -5,6 +5,7 @@ import { GlassCard } from '@/components/ui/glass-card';
 import { requireEffectiveRole } from '@/lib/auth/viewer';
 import { createClient } from '@/lib/supabase/server';
 
+import { PageHeader } from '@/components/ui/page-header';
 export const metadata: Metadata = {
   title: 'Grading',
   description: 'Set grading weights and compute final grades for each term.',
@@ -25,13 +26,7 @@ export default async function GradingPage() {
 
   return (
     <div className="space-y-8">
-      <header>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-soft)]">Academics</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">Grading</h1>
-        <p className="mt-1 max-w-2xl text-sm text-[var(--muted)]">
-          Final grades combine continuous assessment and the final exam using the weights below. Teachers enter scores; only the owner can compute results.
-        </p>
-      </header>
+      <PageHeader eyebrow="Academics" title="Grading" description={<>Final grades combine continuous assessment and the final exam using the weights below. Teachers enter scores; only the owner can compute results.</>} />
 
       <div className="grid gap-6 xl:grid-cols-2">
         <GlassCard className="p-6 sm:p-8">

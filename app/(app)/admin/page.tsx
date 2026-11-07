@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { SchoolRow, type SchoolView } from '@/components/admin/school-row';
-import { GlassCard } from '@/components/ui/glass-card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { PageHeader } from '@/components/ui/page-header';
 import { requireSuperAdmin } from '@/lib/auth/viewer';
 import { createClient } from '@/lib/supabase/server';
 
@@ -26,14 +27,12 @@ export default async function AdminPage() {
 
   return (
     <div className="space-y-8">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-soft)]">Platform</p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight">Schools</h1>
-          <p className="mt-1 text-sm text-[var(--muted)]">Every institution on the platform, with its access status.</p>
-        </div>
-        <Link href="/admin/schools/new" className="btn btn-primary">Create school</Link>
-      </header>
+      <PageHeader
+        eyebrow="Platform"
+        title="Schools"
+        description="Every institution on the platform, with its access status."
+        action={<Link href="/admin/schools/new" className="btn btn-primary">Create school</Link>}
+      />
 
       <section className="grid gap-4 sm:grid-cols-3" aria-label="Summary">
         <div className="depth-card p-5"><p className="text-xs uppercase tracking-wider text-[var(--muted)]">Total</p><p className="mt-2 text-3xl font-bold">{schools.length}</p></div>
@@ -44,7 +43,7 @@ export default async function AdminPage() {
       {error ? (
         <p role="alert" className="form-error">Could not load schools. Refresh the page to try again.</p>
       ) : schools.length === 0 ? (
-        <GlassCard className="p-8 text-center text-sm text-[var(--muted)]">No schools yet. Create the first one to invite its owner.</GlassCard>
+        <EmptyState title="No schools yet">Create the first one to invite its owner.</EmptyState>
       ) : (
         <ul className="space-y-4">
           {schools.map((school) => (

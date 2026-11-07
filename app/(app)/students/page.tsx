@@ -2,10 +2,12 @@ import type { Metadata } from 'next';
 
 import { ClassForm, StudentForm } from '@/components/students/student-forms';
 import { SubjectForm, TermForm } from '@/components/students/setup-forms';
+import { EmptyState } from '@/components/ui/empty-state';
 import { GlassCard } from '@/components/ui/glass-card';
 import { requireEffectiveRole } from '@/lib/auth/viewer';
 import { createClient } from '@/lib/supabase/server';
 
+import { PageHeader } from '@/components/ui/page-header';
 export const metadata: Metadata = {
   title: 'Students',
   description: 'Manage classes and student enrolment.',
@@ -27,11 +29,7 @@ export default async function StudentsPage() {
 
   return (
     <div className="space-y-8">
-      <header>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-soft)]">Records</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">Students</h1>
-        <p className="mt-1 text-sm text-[var(--muted)]">{students.length} students across {classes.length} classes.</p>
-      </header>
+      <PageHeader eyebrow="Records" title="Students" description={<>{students.length} students across {classes.length} classes.</>} />
 
       {canManage && (
         <div className="grid gap-6 lg:grid-cols-2">
@@ -50,7 +48,7 @@ export default async function StudentsPage() {
       )}
 
       <div className="grid gap-5 lg:grid-cols-2">
-        {classes.length === 0 && <GlassCard className="p-8 text-sm text-[var(--muted)] lg:col-span-2">No classes yet.</GlassCard>}
+        {classes.length === 0 && <div className="lg:col-span-2"><EmptyState title="No classes yet">Add a class to start enrolling students.</EmptyState></div>}
         {classes.map((schoolClass) => {
           const members = students.filter((s) => s.class_id === schoolClass.id);
           return (
@@ -60,7 +58,7 @@ export default async function StudentsPage() {
                 <span className="badge bg-white/5 text-[var(--muted)]">{members.length}</span>
               </div>
               <ul className="divide-y divide-[var(--border)] text-sm">
-                {members.length === 0 && <li className="py-2 text-[var(--muted)]">No students enrolled.</li>}
+                {members.length === 0 && <li className="py-3 text-sm text-[var(--muted)]">No students enrolled.</li>}
                 {members.map((s) => (
                   <li key={s.id} className="flex items-center justify-between py-2.5">
                     <span className="font-medium">{s.full_name}</span>

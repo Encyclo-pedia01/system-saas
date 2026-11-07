@@ -2,10 +2,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { AssessmentForm, AssessmentScoreForm, ExamScoreForm } from '@/components/scores/score-forms';
+import { EmptyState } from '@/components/ui/empty-state';
 import { GlassCard } from '@/components/ui/glass-card';
 import { requireEffectiveRole } from '@/lib/auth/viewer';
 import { createClient } from '@/lib/supabase/server';
 
+import { PageHeader } from '@/components/ui/page-header';
 export const metadata: Metadata = {
   title: 'Scores',
   description: 'Enter continuous assessment and exam scores.',
@@ -67,13 +69,7 @@ export default async function ScoresPage({ searchParams }: { searchParams: Searc
 
   return (
     <div className="space-y-8">
-      <header>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-soft)]">Academics</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">Scores</h1>
-        <p className="mt-1 max-w-2xl text-sm text-[var(--muted)]">
-          Teachers enter scores here. Final grades are computed by the owner on the Grading page, and nobody can edit them by hand.
-        </p>
-      </header>
+      <PageHeader eyebrow="Academics" title="Scores" description={<>Teachers enter scores here. Final grades are computed by the owner on the Grading page, and nobody can edit them by hand.</>} />
 
       {canCreate && (
         <GlassCard className="p-6 sm:p-8">
@@ -85,7 +81,7 @@ export default async function ScoresPage({ searchParams }: { searchParams: Searc
       <section aria-labelledby="assessments-heading" className="space-y-4">
         <h2 id="assessments-heading" className="text-lg font-semibold">Continuous assessments</h2>
         {(assessments.data ?? []).length === 0 ? (
-          <GlassCard className="p-6 text-sm text-[var(--muted)]">No assessments yet.</GlassCard>
+          <EmptyState title="No assessments yet">Create an assessment above, then enter its scores.</EmptyState>
         ) : (
           <div className="flex flex-wrap gap-2">
             {(assessments.data ?? []).map((a) => {

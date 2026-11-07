@@ -4,6 +4,7 @@ import { CheckInBoard, type StudentRow } from '@/components/check-in/check-in-bo
 import { requireEffectiveRole } from '@/lib/auth/viewer';
 import { createClient } from '@/lib/supabase/server';
 
+import { PageHeader } from '@/components/ui/page-header';
 export const metadata: Metadata = {
   title: 'Check-in',
   description: 'Record student arrivals and absences for today.',
@@ -21,13 +22,7 @@ export default async function CheckInPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-soft)]">Attendance</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">Check-in</h1>
-        <p className="mt-1 text-sm text-[var(--muted)]">
-          Arrival times are recorded by the server. Anyone arriving after the school start time, plus any grace period, is marked late.
-        </p>
-      </header>
+      <PageHeader eyebrow="Attendance" title="Check-in" description={<>Arrival times are recorded by the server. Anyone arriving after the school start time, plus any grace period, is marked late.</>} />
 
       {error ? (
         <p role="alert" className="form-error">Could not load the student list. Refresh and try again.</p>

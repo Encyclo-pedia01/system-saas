@@ -33,6 +33,12 @@ body {
   background: rgba(47, 107, 255, 0.45);
 }
 
+:focus-visible {
+  outline: 2px solid var(--accent-soft);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
 /* Glassmorphism: frosted panel with a faint highlight border. */
 .glass {
   background: linear-gradient(160deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
