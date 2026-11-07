@@ -37,7 +37,7 @@ export async function parseScoreFile(file: File, maxScore: number): Promise<Scor
   const scoreColumn = headers.findIndex((h) => scoreHeaders.includes(h));
 
   if (admissionColumn === -1 || scoreColumn === -1) {
-    return { ok: false, message: 'The first row must include an Admission number column and a Score column.' };
+    return { ok: false, message: 'The first row must include an Admission number column and a Score column. Download the template to see the right headers.' };
   }
   if (dataRows.length > maxScoreRows) {
     return { ok: false, message: `Upload at most ${maxScoreRows} scores at a time.` };
@@ -77,7 +77,7 @@ export async function parseScoreFile(file: File, maxScore: number): Promise<Scor
     rows.push({ line, admissionNumber, score, issue });
   });
 
-  if (rows.length === 0) return { ok: false, message: 'No score rows were found under the header.' };
+  if (rows.length === 0) return { ok: false, message: 'No student rows were found below the header row.' };
 
   return { ok: true, rows };
 }

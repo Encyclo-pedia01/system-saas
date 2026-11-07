@@ -105,7 +105,7 @@ export async function importStudentsAction(
   try {
     payload = JSON.parse(String(formData.get('students') ?? '[]'));
   } catch {
-    return failure('The upload could not be read. Upload the file again.');
+    return failure('The upload could not be read. Save the file as .csv or .xlsx and try again.');
   }
 
   const rawGroup = String(formData.get('groupId') ?? '');
@@ -127,14 +127,14 @@ export async function importStudentsAction(
     .maybeSingle();
 
   if (classError) return databaseFailure(classError, 'Could not read the class.');
-  if (!schoolClass) return failure('Choose a class from the list.');
+  if (!schoolClass) return failure('Choose a class from the list. If it is missing, create the class first.');
 
   if (schoolClass.has_groups && !parsed.data.groupId) {
-    return failure('This class has groups. Choose a group for these students.');
+    return failure('This class has groups, so choose the group these students belong to.');
   }
 
   if (!schoolClass.has_groups && parsed.data.groupId) {
-    return failure('This class has no groups.');
+    return failure('This class has no groups, so leave the group empty.');
   }
 
   const admissionNumbers = parsed.data.students.map((s) => s.admissionNumber);
@@ -163,7 +163,7 @@ export async function importStudentsAction(
     })),
   );
 
-  if (error) return databaseFailure(error, 'Could not import the students. Nothing was saved.');
+  if (error) return databaseFailure(error, 'Could not import the students. Nothing was saved. Try again in a moment.');
 
   const skipped = parsed.data.students.length - fresh.length;
   revalidatePath('/students');
@@ -199,7 +199,7 @@ export async function createStudentAction(
     admission_number: parsed.data.admissionNumber,
   });
 
-  if (error) return databaseFailure(error, 'Could not add the student.');
+  if (error) return databaseFailure(error, 'Could not add the student. The admission number may already be in use.');
 
   revalidatePath('/students');
   return success(`${parsed.data.fullName} added.`);
@@ -220,7 +220,7 @@ export async function createSubjectAction(
     .from('subjects')
     .insert({ institution_id: guard.context.institutionId, name: parsed.data.name });
 
-  if (error) return databaseFailure(error, 'Could not create the subject.');
+  if (error) return databaseFailure(error, 'Could not create the subject. It may already exist.');
 
   revalidatePath('/students');
   revalidatePath('/scores');
@@ -249,7 +249,7 @@ export async function createTermAction(
     ends_on: parsed.data.endsOn,
   });
 
-  if (error) return databaseFailure(error, 'Could not create the term.');
+  if (error) return databaseFailure(error, 'Could not create the term. Check the dates and try again.');
 
   revalidatePath('/students');
   revalidatePath('/scores');

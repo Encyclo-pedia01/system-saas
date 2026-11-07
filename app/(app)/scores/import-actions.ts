@@ -78,7 +78,7 @@ export async function importScoresAction(
 
   if (mode === 'assessment') {
     const assessmentId = String(formData.get('assessmentId') ?? '');
-    if (!/^[0-9a-f-]{36}$/i.test(assessmentId)) return failure('Choose an assessment.');
+    if (!/^[0-9a-f-]{36}$/i.test(assessmentId)) return failure('Choose an assessment from the list. Create one first if none is listed.');
 
     const { data: assessment, error } = await supabase
       .from('assessments')
@@ -88,7 +88,7 @@ export async function importScoresAction(
       .maybeSingle();
 
     if (error) return databaseFailure(error, 'Could not read the assessment.');
-    if (!assessment) return failure('That assessment could not be found.');
+    if (!assessment) return failure('That assessment could not be found. Refresh the page and try again.');
 
     classId = assessment.class_id;
     maxScore = Number(assessment.max_score);

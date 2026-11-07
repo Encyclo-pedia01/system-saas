@@ -87,7 +87,8 @@ export function StudentUpload({ classes }: { classes: ClassOption[] }) {
           className="field-input file:mr-4 file:rounded-md file:border-0 file:bg-[var(--hover)] file:px-3 file:py-1.5 file:text-sm"
         />
         <p className="mt-1 text-xs text-[var(--muted)]">
-          The first row must be headers: <span className="font-medium">Name</span> and <span className="font-medium">Admission number</span>. Up to {maxRosterRows} students per file.
+          The first row must be headers: <span className="font-medium">Name</span> and <span className="font-medium">Admission number</span>. Up to {maxRosterRows} students per file.{' '}
+          <a href="/templates/students-template.csv" download className="font-medium text-[var(--accent-soft)] underline">Download template</a>
         </p>
         {parsing && <p className="mt-2 text-sm text-[var(--muted)]" role="status">Reading the file…</p>}
         {fileError && <p role="alert" className="form-error mt-2">{fileError}</p>}

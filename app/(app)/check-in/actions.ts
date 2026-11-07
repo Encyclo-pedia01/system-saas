@@ -38,7 +38,7 @@ export async function checkInStudentAction(
   const { data, error } = await supabase.rpc('record_check_in', { p_student_id: parsed.data.studentId });
 
   if (error) {
-    return databaseFailure(error, 'Could not record the check-in.');
+    return databaseFailure(error, 'Could not record the check-in. Try again. If it keeps failing, check whether this student is already marked today.');
   }
 
   revalidatePath('/check-in');
@@ -66,7 +66,7 @@ export async function markAbsentAction(
   const { error } = await supabase.rpc('record_absence', { p_student_id: parsed.data.studentId });
 
   if (error) {
-    return databaseFailure(error, 'Could not record the absence.');
+    return databaseFailure(error, 'Could not record the absence. Try again. If it keeps failing, check whether this student is already marked today.');
   }
 
   revalidatePath('/check-in');

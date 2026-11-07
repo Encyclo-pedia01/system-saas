@@ -122,7 +122,8 @@ export function ScoreUpload({
           className="field-input file:mr-4 file:rounded-md file:border-0 file:bg-[var(--hover)] file:px-3 file:py-1.5 file:text-sm"
         />
         <p className="mt-1 text-xs text-[var(--muted)]">
-          The first row must be headers: <span className="font-medium">Admission number</span> and <span className="font-medium">Score</span>. Leave a score blank to skip that student. Up to {maxScoreRows} rows.
+          The first row must be headers: <span className="font-medium">Admission number</span> and <span className="font-medium">Score</span>. Leave a score blank to skip that student. Up to {maxScoreRows} rows.{' '}
+          <a href="/templates/scores-template.csv" download className="font-medium text-[var(--accent-soft)] underline">Download template</a>
         </p>
         {parsing && <p role="status" className="mt-2 text-sm text-[var(--muted)]">Reading the file…</p>}
         {fileError && <p role="alert" className="form-error mt-2">{fileError}</p>}
