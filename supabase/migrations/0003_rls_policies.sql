@@ -3,6 +3,21 @@
 -- Roles: owner (school principal), staff (teacher), authority (check-in officer),
 -- and super admin (platform owner, profiles.is_super_admin).
 
+-- Make this file safe to re-run: drop any policies left by an earlier partial run.
+do $$
+declare
+  r record;
+begin
+  for r in
+    select schemaname, tablename, policyname
+    from pg_policies
+    where schemaname = 'public'
+  loop
+    execute format('drop policy if exists %I on %I.%I', r.policyname, r.schemaname, r.tablename);
+  end loop;
+end
+$$;
+
 -- Start from zero privileges so nothing is reachable without an explicit grant below.
 revoke all on all tables in schema public from anon, authenticated;
 revoke all on all sequences in schema public from anon, authenticated;
