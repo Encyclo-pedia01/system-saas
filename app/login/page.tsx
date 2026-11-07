@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 import { AmbientScene } from '@/components/3d/scene-loader';
 import { LoginForm } from '@/components/auth/login-form';
@@ -22,6 +23,12 @@ export default function LoginPage() {
         </div>
 
         <LoginForm />
+
+        <p className="mt-6 text-center text-sm">
+          <Link href="/forgot-password" className="text-[var(--accent-soft)] underline-offset-4 hover:underline">
+            Forgot your password?
+          </Link>
+        </p>
       </GlassCard>
     </main>
   );

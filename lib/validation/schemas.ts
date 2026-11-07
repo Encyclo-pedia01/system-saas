@@ -127,3 +127,7 @@ export const termSchema = z
     message: 'The end date must be on or after the start date.',
     path: ['endsOn'],
   });
+
+export const forgotPasswordSchema = z.object({
+  email: z.email('Enter a valid email address.').trim().toLowerCase(),
+});
