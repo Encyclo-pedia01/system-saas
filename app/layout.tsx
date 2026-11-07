@@ -11,8 +11,8 @@ import './globals.css';
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: {
-    default: 'School OS',
-    template: '%s | School OS',
+    default: 'Campus Veritas',
+    template: '%s | Campus Veritas',
   },
   description: 'Multi-school management for attendance, grading, and academic insights.',
   icons: { icon: '/icon.svg' },

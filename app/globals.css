@@ -12,6 +12,9 @@
   --danger: #ff7a7a;
   --success: #4fe3b0;
   --warning: #ffc66b;
+  /* Amber highlight for calls to action and badges. Navy text on amber is about 10:1. */
+  --highlight: #fbbf24;
+  --highlight-text: #0a0f26;
 }
 
 html,

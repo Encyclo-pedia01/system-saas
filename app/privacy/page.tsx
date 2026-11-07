@@ -5,7 +5,7 @@ import { GlassCard } from '@/components/ui/glass-card';
 
 export const metadata: Metadata = {
   title: 'Privacy notice',
-  description: 'How School OS collects, uses, and protects personal data.',
+  description: 'How Campus Veritas collects, uses, and protects personal data.',
 };
 
 export default function PrivacyPage() {

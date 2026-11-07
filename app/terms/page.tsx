@@ -5,7 +5,7 @@ import { GlassCard } from '@/components/ui/glass-card';
 
 export const metadata: Metadata = {
   title: 'Terms of service',
-  description: 'The terms that govern use of School OS.',
+  description: 'The terms that govern use of Campus Veritas.',
 };
 
 export default function TermsPage() {
