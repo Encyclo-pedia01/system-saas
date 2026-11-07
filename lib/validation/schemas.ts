@@ -80,3 +80,35 @@ export const studentActionSchema = z.object({
 export const insightActionSchema = z.object({
   insightId: z.uuid(),
 });
+
+export const classSchema = z.object({
+  name: z.string().trim().min(1, 'Enter a class name.').max(60),
+});
+
+export const studentSchema = z.object({
+  classId: z.uuid('Choose a class.'),
+  fullName: z.string().trim().min(2, 'Enter the student’s full name.').max(120),
+  admissionNumber: z.string().trim().min(1, 'Enter an admission number.').max(40),
+});
+
+export const assessmentSchema = z.object({
+  classId: z.uuid('Choose a class.'),
+  subjectId: z.uuid('Choose a subject.'),
+  termId: z.uuid('Choose a term.'),
+  title: z.string().trim().min(1, 'Enter a title.').max(120),
+  maxScore: z.coerce.number({ message: 'Enter a number.' }).positive('Must be greater than 0.').max(1000),
+});
+
+export const examScoreContextSchema = z.object({
+  classId: z.uuid('Choose a class.'),
+  subjectId: z.uuid('Choose a subject.'),
+  termId: z.uuid('Choose a term.'),
+  maxScore: z.coerce.number({ message: 'Enter a number.' }).positive('Must be greater than 0.').max(1000),
+});
+
+export const scoreEntriesSchema = z.array(
+  z.object({
+    studentId: z.uuid(),
+    score: z.coerce.number({ message: 'Scores must be numbers.' }).min(0, 'Scores cannot be negative.'),
+  }),
+);
