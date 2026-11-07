@@ -41,8 +41,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Suspense fallback={null}>{children}</Suspense>
         </div>
         <SiteFooter />
-        <Toaster />
         <CookieBanner />
+        <Toaster />
       </body>
     </html>
   );

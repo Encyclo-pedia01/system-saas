@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { SubmitButton } from '@/components/ui/submit-button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export type NavItem = { href: string; label: string; icon: ReactNode };
 
@@ -109,6 +110,9 @@ export function AppShell({
         {roleLabel}
         {schoolName ? ` · ${schoolName}` : ''}
       </p>
+      <div className="mt-3">
+        <ThemeToggle />
+      </div>
       <form action={signOutAction} className="mt-3">
         <SubmitButton variant="ghost" pendingLabel="Signing out…" className="w-full">
           Sign out

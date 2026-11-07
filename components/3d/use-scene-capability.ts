@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-const WIDE_VIEWPORT_QUERY = '(min-width: 768px)';
+const WIDE_VIEWPORT_QUERY = '(min-width: 1100px)';
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
 function supportsWebGL(): boolean {
