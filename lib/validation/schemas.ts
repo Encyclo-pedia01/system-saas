@@ -112,3 +112,18 @@ export const scoreEntriesSchema = z.array(
     score: z.coerce.number({ message: 'Scores must be numbers.' }).min(0, 'Scores cannot be negative.'),
   }),
 );
+
+export const subjectSchema = z.object({
+  name: z.string().trim().min(1, 'Enter a subject name.').max(80),
+});
+
+export const termSchema = z
+  .object({
+    name: z.string().trim().min(1, 'Enter a term name.').max(60),
+    startsOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a start date.'),
+    endsOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose an end date.'),
+  })
+  .refine((value) => value.endsOn >= value.startsOn, {
+    message: 'The end date must be on or after the start date.',
+    path: ['endsOn'],
+  });

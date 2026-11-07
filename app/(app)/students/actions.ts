@@ -6,7 +6,7 @@ import type { ActionResult } from '@/lib/actions/result';
 import { databaseFailure, failure, fromZodError, success } from '@/lib/actions/result';
 import { resolveWriteContext } from '@/lib/auth/write-guard';
 import { createClient } from '@/lib/supabase/server';
-import { classSchema, studentSchema } from '@/lib/validation/schemas';
+import { classSchema, studentSchema, subjectSchema, termSchema } from '@/lib/validation/schemas';
 
 export async function createClassAction(
   _previous: ActionResult | null,
@@ -55,4 +55,56 @@ export async function createStudentAction(
 
   revalidatePath('/students');
   return success(`${parsed.data.fullName} added.`);
+}
+
+export async function createSubjectAction(
+  _previous: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await resolveWriteContext(['owner']);
+  if (!guard.ok) return failure(guard.message);
+
+  const parsed = subjectSchema.safeParse({ name: formData.get('name') });
+  if (!parsed.success) return fromZodError(parsed.error);
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('subjects')
+    .insert({ institution_id: guard.context.institutionId, name: parsed.data.name });
+
+  if (error) return databaseFailure(error, 'Could not create the subject.');
+
+  revalidatePath('/students');
+  revalidatePath('/scores');
+  return success(`Subject “${parsed.data.name}” created.`);
+}
+
+export async function createTermAction(
+  _previous: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await resolveWriteContext(['owner']);
+  if (!guard.ok) return failure(guard.message);
+
+  const parsed = termSchema.safeParse({
+    name: formData.get('name'),
+    startsOn: formData.get('startsOn'),
+    endsOn: formData.get('endsOn'),
+  });
+  if (!parsed.success) return fromZodError(parsed.error);
+
+  const supabase = await createClient();
+  const { error } = await supabase.from('terms').insert({
+    institution_id: guard.context.institutionId,
+    name: parsed.data.name,
+    starts_on: parsed.data.startsOn,
+    ends_on: parsed.data.endsOn,
+  });
+
+  if (error) return databaseFailure(error, 'Could not create the term.');
+
+  revalidatePath('/students');
+  revalidatePath('/scores');
+  revalidatePath('/grading');
+  return success(`Term “${parsed.data.name}” created.`);
 }

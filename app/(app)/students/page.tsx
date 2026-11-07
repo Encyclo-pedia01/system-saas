@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 import { ClassForm, StudentForm } from '@/components/students/student-forms';
+import { SubjectForm, TermForm } from '@/components/students/setup-forms';
 import { GlassCard } from '@/components/ui/glass-card';
 import { requireEffectiveRole } from '@/lib/auth/viewer';
 import { createClient } from '@/lib/supabase/server';
@@ -38,6 +39,13 @@ export default async function StudentsPage() {
           <GlassCard className="p-6"><h2 className="mb-4 text-lg font-semibold">Enrol a student</h2>
             {classes.length === 0 ? <p className="text-sm text-[var(--muted)]">Add a class first.</p> : <StudentForm classes={classes} />}
           </GlassCard>
+        </div>
+      )}
+
+      {canManage && (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <GlassCard className="p-6"><h2 className="mb-4 text-lg font-semibold">Add a subject</h2><SubjectForm /></GlassCard>
+          <GlassCard className="p-6"><h2 className="mb-4 text-lg font-semibold">Add a term</h2><TermForm /></GlassCard>
         </div>
       )}
 
