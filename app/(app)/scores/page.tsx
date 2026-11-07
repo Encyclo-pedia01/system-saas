@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { AssessmentForm, AssessmentScoreForm, ExamScoreForm } from '@/components/scores/score-forms';
+import { ScoreUpload } from '@/components/scores/score-upload';
 import { EmptyState } from '@/components/ui/empty-state';
 import { GlassCard } from '@/components/ui/glass-card';
 import { requireEffectiveRole } from '@/lib/auth/viewer';
@@ -70,6 +71,24 @@ export default async function ScoresPage({ searchParams }: { searchParams: Searc
   return (
     <div className="space-y-8">
       <PageHeader eyebrow="Academics" title="Scores" description={<>Teachers enter scores here. Final grades are computed by the owner on the Grading page, and nobody can edit them by hand.</>} />
+
+      {canEnter && (
+        <GlassCard className="p-6 sm:p-8">
+          <h2 className="mb-1 text-lg font-semibold">Upload scores from a file</h2>
+          <p className="mb-5 text-sm text-[var(--muted)]">Upload marks for a whole class at once. You’ll see a preview before anything is saved.</p>
+          <ScoreUpload
+            assessments={(assessments.data ?? []).map((a) => ({
+              id: a.id,
+              title: a.title,
+              maxScore: Number(a.max_score),
+              className: (a.classes as unknown as { name: string } | null)?.name ?? '',
+            }))}
+            classes={classOptions}
+            subjects={subjectOptions}
+            terms={termOptions}
+          />
+        </GlassCard>
+      )}
 
       {canCreate && (
         <GlassCard className="p-6 sm:p-8">

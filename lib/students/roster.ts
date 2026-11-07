@@ -50,7 +50,7 @@ function splitCsvLine(line: string): string[] {
   return cells;
 }
 
-async function readTable(file: File): Promise<string[][]> {
+export async function readTable(file: File): Promise<string[][]> {
   if (file.name.toLowerCase().endsWith('.xlsx')) {
     const sheet = await readSheet(file);
     return sheet.map((row) => row.map((cell) => (cell === null || cell === undefined ? '' : String(cell).trim())));
