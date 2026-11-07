@@ -2,8 +2,10 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { InsightCard, type InsightView } from '@/components/dashboard/insight-card';
+import { SetupChecklist } from '@/components/dashboard/setup-checklist';
 import { GlassCard } from '@/components/ui/glass-card';
 import { requireSchoolViewer } from '@/lib/auth/viewer';
+import { getSetupItems } from '@/lib/dashboard/setup-status';
 import { createClient } from '@/lib/supabase/server';
 
 import { PageHeader } from '@/components/ui/page-header';
@@ -54,6 +56,8 @@ export default async function DashboardPage() {
       : Promise.resolve({ data: [] as Array<{ status: string }> }),
   ]);
 
+  const setupItems = viewer.effectiveRole === 'owner' ? await getSetupItems(supabase, institutionId, viewer.mfaEnrolled) : null;
+
   const insights = (insightsResult.data ?? []) as InsightView[];
   const checkIns = checkInsToday.data ?? [];
   const late = checkIns.filter((row) => row.status === 'late').length;
@@ -63,6 +67,8 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <PageHeader eyebrow="Overview" title="Dashboard" description={<>{viewer.institution?.name} · {today}</>} />
+
+      {setupItems && <SetupChecklist items={setupItems} />}
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Summary">
         <StatCard label="Students" value={studentCount.count ?? 0} hint="Enrolled across all classes" />
