@@ -8,12 +8,13 @@ import { SubmitButton } from '@/components/ui/submit-button';
 import { useActionToast } from '@/components/ui/use-action-toast';
 import type { ActionResult } from '@/lib/actions/result';
 
-export function SetPasswordForm() {
+export function SetPasswordForm({ next }: { next?: string }) {
   const [state, formAction] = useActionState<ActionResult | null, FormData>(setPasswordAction, null);
   useActionToast(state);
 
   return (
     <form action={formAction} className="space-y-5" noValidate>
+      {next && <input type="hidden" name="next" value={next} />}
       <div>
         <label htmlFor="password" className="field-label">New password</label>
         <input id="password" name="password" type="password" autoComplete="new-password" required className="field-input" aria-invalid={Boolean(state?.fieldErrors?.password)} />

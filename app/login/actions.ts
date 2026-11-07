@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 
 import type { ActionResult } from '@/lib/actions/result';
 import { failure, fromZodError } from '@/lib/actions/result';
+import { safeNextPath } from '@/lib/auth/safe-next';
 import { getViewer } from '@/lib/auth/viewer';
 import { createClient } from '@/lib/supabase/server';
 import { loginSchema } from '@/lib/validation/schemas';
@@ -46,5 +47,6 @@ export async function signInAction(
     }
   }
 
-  redirect(viewer.isSuperAdmin ? '/admin' : '/dashboard');
+  const next = safeNextPath(formData.get('next'), '');
+  redirect(next || (viewer.isSuperAdmin ? '/admin' : '/dashboard'));
 }

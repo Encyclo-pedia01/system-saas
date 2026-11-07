@@ -8,7 +8,11 @@ export const metadata: Metadata = {
   description: 'Finish setting up your school account.',
 };
 
-export default function SetPasswordPage() {
+type Props = { searchParams: Promise<{ next?: string | string[] }> };
+
+export default async function SetPasswordPage({ searchParams }: Props) {
+  const { next } = await searchParams;
+  const nextValue = Array.isArray(next) ? next[0] : next;
   return (
     <main className="relative flex flex-1 items-center justify-center px-6 py-16">
       <GlassCard className="w-full max-w-md p-8 sm:p-10">
@@ -17,7 +21,7 @@ export default function SetPasswordPage() {
         <p className="mb-6 mt-2 text-sm leading-relaxed text-[var(--muted)]">
           Choose a password to finish activating your account. Use at least 10 characters.
         </p>
-        <SetPasswordForm />
+        <SetPasswordForm next={nextValue} />
       </GlassCard>
     </main>
   );

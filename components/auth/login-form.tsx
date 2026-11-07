@@ -8,7 +8,7 @@ import { FieldError } from '@/components/ui/field-error';
 import { SubmitButton } from '@/components/ui/submit-button';
 import type { ActionResult } from '@/lib/actions/result';
 
-export function LoginForm() {
+export function LoginForm({ next }: { next?: string }) {
   const [state, formAction] = useActionState<ActionResult | null, FormData>(signInAction, null);
   useActionToast(state);
 
@@ -16,6 +16,7 @@ export function LoginForm() {
 
   return (
     <form action={formAction} className="space-y-5" noValidate>
+      {next && <input type="hidden" name="next" value={next} />}
       <div>
         <label htmlFor="email" className="field-label">Work email</label>
         <input

@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 
 import type { ActionResult } from '@/lib/actions/result';
+import { safeNextPath } from '@/lib/auth/safe-next';
 import { failure, fromZodError } from '@/lib/actions/result';
 import { createClient } from '@/lib/supabase/server';
 import { setPasswordSchema } from '@/lib/validation/schemas';
@@ -27,5 +28,5 @@ export async function setPasswordAction(
     return failure('Could not save your password. Request a new invitation and try again.');
   }
 
-  redirect('/dashboard');
+  redirect(safeNextPath(formData.get('next')));
 }
