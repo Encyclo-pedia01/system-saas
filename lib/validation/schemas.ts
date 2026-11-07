@@ -4,15 +4,6 @@ const timeOfDay = z
   .string()
   .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use a 24-hour time such as 08:00.');
 
-export function isValidTimeZone(value: string): boolean {
-  try {
-    new Intl.DateTimeFormat('en-GB', { timeZone: value });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 export const loginSchema = z.object({
   email: z.email('Enter a valid email address.').trim().toLowerCase(),
   password: z.string().min(1, 'Enter your password.'),
@@ -37,7 +28,7 @@ export const createSchoolSchema = z.object({
     .min(3, 'Use at least 3 characters.')
     .max(60)
     .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'Use lowercase letters, numbers, and hyphens only.'),
-  timezone: z.string().refine(isValidTimeZone, 'Choose a valid timezone.'),
+  timezone: z.literal('Africa/Accra', { message: 'Campus Veritas schools use Ghana time (Africa/Accra).' }),
   schoolStartTime: timeOfDay,
   gracePeriodMinutes: z.coerce
     .number({ message: 'Enter a number of minutes.' })

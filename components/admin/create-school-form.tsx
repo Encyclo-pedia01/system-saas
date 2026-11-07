@@ -8,8 +8,6 @@ import { SubmitButton } from '@/components/ui/submit-button';
 import { useActionToast } from '@/components/ui/use-action-toast';
 import type { ActionResult } from '@/lib/actions/result';
 
-const timezones = ['Africa/Accra', 'Africa/Lagos', 'Africa/Nairobi', 'Europe/London', 'UTC'];
-
 export function CreateSchoolForm() {
   const [state, formAction] = useActionState<ActionResult<{ institutionId: string }> | null, FormData>(createSchoolAction, null);
   useActionToast(state);
@@ -33,7 +31,7 @@ export function CreateSchoolForm() {
         <div>
           <label htmlFor="timezone" className="field-label">Timezone</label>
           <select id="timezone" name="timezone" defaultValue="Africa/Accra" className="field-select">
-            {timezones.map((zone) => <option key={zone} value={zone}>{zone}</option>)}
+            <option value="Africa/Accra">Ghana (Africa/Accra)</option>
           </select>
           <FieldError messages={errors?.timezone} />
         </div>
