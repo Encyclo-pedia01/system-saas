@@ -78,7 +78,7 @@ export function AppShell({
   );
 
   return (
-    <div className="flex min-h-full flex-1">
+    <div className="flex min-h-0 flex-1">
       <aside className="depth-card sticky top-4 m-4 hidden h-[calc(100vh-2rem)] w-64 shrink-0 flex-col gap-6 p-5 md:flex">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[var(--accent-soft)]">School OS</p>
