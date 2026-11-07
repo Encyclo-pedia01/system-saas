@@ -25,7 +25,7 @@ async function requireSuperAdminId(): Promise<string | null> {
 export async function createSchoolAction(
   _previous: ActionResult | null,
   formData: FormData,
-): Promise<ActionResult<{ institutionId: string }>> {
+): Promise<ActionResult<{ institutionId: string; inviteLink: string }>> {
   const actorId = await requireSuperAdminId();
 
   if (!actorId) {
@@ -61,6 +61,10 @@ export async function createSchoolAction(
     .select('id')
     .single();
 
+  if (institutionError?.code === '23505') {
+    return failure('That URL slug is already used by another school. Choose a different slug.');
+  }
+
   if (institutionError || !institution) {
     return databaseFailure(institutionError ?? { message: 'missing row' }, 'Could not create the school.');
   }
@@ -68,32 +72,38 @@ export async function createSchoolAction(
   const admin = createAdminClient();
   const rollbackInstitution = () => admin.from('institutions').delete().eq('id', institution.id);
 
-  const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(input.ownerEmail, {
-    data: { full_name: input.ownerName },
-    redirectTo: `${siteUrl()}/auth/callback?next=/set-password`,
+  // No email is sent from here. The link is returned for the super admin to copy and send,
+  // the same way staff invitations work.
+  const { data: generated, error: inviteError } = await admin.auth.admin.generateLink({
+    type: 'invite',
+    email: input.ownerEmail,
+    options: { data: { full_name: input.ownerName } },
   });
 
-  if (inviteError || !invited.user) {
+  if (inviteError || !generated.user || !generated.properties?.hashed_token) {
     await rollbackInstitution();
     const alreadyExists = inviteError?.message.toLowerCase().includes('already');
     return failure(
       alreadyExists
         ? 'That email already has an account. Use a different owner email.'
-        : 'Could not send the owner invitation.',
+        : 'Could not create the owner invitation. Try again.',
     );
   }
 
+  const ownerUserId = generated.user.id;
   const { error: membershipError } = await supabase.from('memberships').insert({
-    user_id: invited.user.id,
+    user_id: ownerUserId,
     institution_id: institution.id,
     role: 'owner',
   });
 
   if (membershipError) {
     await rollbackInstitution();
-    await admin.auth.admin.deleteUser(invited.user.id);
+    await admin.auth.admin.deleteUser(ownerUserId);
     return databaseFailure(membershipError, 'Could not link the owner to the school.');
   }
+
+  const inviteLink = `${siteUrl()}/auth/callback?token_hash=${encodeURIComponent(generated.properties.hashed_token)}&type=invite&next=${encodeURIComponent('/set-password')}`;
 
   await supabase.from('invitations').insert({
     institution_id: institution.id,
@@ -103,7 +113,10 @@ export async function createSchoolAction(
   });
 
   revalidatePath('/admin');
-  return success(`Invitation sent to ${input.ownerEmail}.`, { institutionId: institution.id });
+  return success(
+    `School created. Copy the owner's invitation link and send it to ${input.ownerEmail}.`,
+    { institutionId: institution.id, inviteLink },
+  );
 }
 
 export async function toggleSchoolStatusAction(
