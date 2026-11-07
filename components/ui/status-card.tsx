@@ -5,9 +5,9 @@ import { GlassCard } from '@/components/ui/glass-card';
 type Tone = 'accent' | 'warning' | 'danger';
 
 const toneClasses: Record<Tone, string> = {
-  accent: 'bg-[rgba(47,107,255,0.16)] text-[var(--accent-soft)] ring-[rgba(156,192,255,0.35)]',
-  warning: 'bg-[rgba(255,198,107,0.14)] text-[var(--warning)] ring-[rgba(255,198,107,0.35)]',
-  danger: 'bg-[rgba(255,122,122,0.14)] text-[var(--danger)] ring-[rgba(255,122,122,0.35)]',
+  accent: 'tone-accent ring-[var(--focus-ring)]',
+  warning: 'tone-warning ring-[rgba(230,160,40,0.35)]',
+  danger: 'tone-danger ring-[rgba(220,80,80,0.35)]',
 };
 
 export function StatusCard({

@@ -55,7 +55,7 @@ export default async function StudentsPage() {
             <section key={schoolClass.id} className="depth-card p-5" aria-labelledby={`cls-${schoolClass.id}`}>
               <div className="mb-3 flex items-center justify-between">
                 <h2 id={`cls-${schoolClass.id}`} className="text-base font-semibold">{schoolClass.name}</h2>
-                <span className="badge bg-white/5 text-[var(--muted)]">{members.length}</span>
+                <span className="badge bg-[var(--hover)] text-[var(--muted)]">{members.length}</span>
               </div>
               <ul className="divide-y divide-[var(--border)] text-sm">
                 {members.length === 0 && <li className="py-3 text-sm text-[var(--muted)]">No students enrolled.</li>}

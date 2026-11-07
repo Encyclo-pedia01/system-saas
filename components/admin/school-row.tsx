@@ -32,7 +32,7 @@ export function SchoolRow({ school }: { school: SchoolView }) {
       <div className="min-w-0 space-y-2">
         <div className="flex flex-wrap items-center gap-3">
           <h3 className="truncate text-lg font-semibold">{school.name}</h3>
-          <span className={`badge ${suspended ? 'bg-[rgba(255,122,122,0.15)] text-[#ffb3b3]' : 'bg-[rgba(79,227,176,0.15)] text-[#b5f5dd]'}`}>
+          <span className={`badge ${suspended ? 'tone-danger' : 'tone-success'}`}>
             {school.status}
           </span>
         </div>

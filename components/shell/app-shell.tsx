@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { SubmitButton } from '@/components/ui/submit-button';
 
@@ -36,6 +36,46 @@ export function AppShell({
 }: AppShellProps) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const drawerRef = useRef<HTMLElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Escape closes the drawer, Tab cycles inside it, and focus returns to the Menu button on close.
+  useEffect(() => {
+    if (!drawerOpen) return;
+
+    const focusableItems = () =>
+      drawerRef.current ? Array.from(drawerRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')) : [];
+
+    const menuButton = menuButtonRef.current;
+    focusableItems()[0]?.focus();
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setDrawerOpen(false);
+        return;
+      }
+      if (event.key !== 'Tab') return;
+
+      const items = focusableItems();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      menuButton?.focus();
+    };
+  }, [drawerOpen]);
 
   const navigation = (
     <nav className="flex flex-col gap-1" aria-label="Main">
@@ -48,10 +88,10 @@ export function AppShell({
             href={item.href}
             aria-current={active ? 'page' : undefined}
             onClick={() => setDrawerOpen(false)}
-            className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+            className={`group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
               active
-                ? 'bg-[var(--accent)] text-white shadow-[0_10px_24px_-12px_rgba(47,107,255,0.9)]'
-                : 'text-[var(--muted)] hover:translate-x-0.5 hover:bg-white/5 hover:text-[var(--text)]'
+                ? 'bg-[var(--accent)] text-[var(--on-accent)] shadow-[0_10px_24px_-12px_rgba(47,107,255,0.9)]'
+                : 'text-[var(--muted)] hover:translate-x-0.5 hover:bg-[var(--hover)] hover:text-[var(--text)]'
             }`}
           >
             <span className="grid size-5 place-items-center" aria-hidden="true">{item.icon}</span>
@@ -88,11 +128,12 @@ export function AppShell({
         {identityCard}
       </aside>
 
-      <header className="fixed inset-x-0 top-0 z-30 flex items-center justify-between border-b border-[var(--border)] bg-[rgba(7,11,31,0.8)] px-4 py-3 backdrop-blur-md md:hidden">
+      <header className="fixed inset-x-0 top-0 z-30 flex items-center justify-between border-b border-[var(--border)] bg-[var(--header-bg)] px-4 py-3 backdrop-blur-md md:hidden">
         <button
           type="button"
+          ref={menuButtonRef}
           onClick={() => setDrawerOpen(true)}
-          className="btn btn-ghost min-h-10 px-3"
+          className="btn btn-ghost min-h-11 px-3"
           aria-label="Open navigation"
           aria-expanded={drawerOpen}
         >
@@ -106,7 +147,7 @@ export function AppShell({
           <>
             <motion.div
               key="overlay"
-              className="fixed inset-0 z-40 bg-black/60 md:hidden"
+              className="fixed inset-0 z-40 bg-[var(--overlay)] md:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -118,6 +159,7 @@ export function AppShell({
               role="dialog"
               aria-modal="true"
               aria-label="Navigation"
+              ref={drawerRef}
               className="glass fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col gap-6 rounded-none p-5 md:hidden"
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
@@ -126,7 +168,7 @@ export function AppShell({
             >
               <div className="flex items-center justify-between">
                 <p className="truncate text-lg font-bold">{schoolName ?? 'Platform'}</p>
-                <button type="button" className="btn btn-ghost min-h-9 px-3" onClick={() => setDrawerOpen(false)}>
+                <button type="button" className="btn btn-ghost min-h-11 px-3" onClick={() => setDrawerOpen(false)}>
                   Close
                 </button>
               </div>
@@ -139,7 +181,7 @@ export function AppShell({
 
       <div className="flex min-w-0 flex-1 flex-col">
         {impersonation && (
-          <div className="mx-4 mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[rgba(255,198,107,0.45)] bg-[rgba(255,198,107,0.12)] px-4 py-3 text-sm md:mt-4">
+          <div className="notice mx-4 mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm md:mt-4">
             <p>
               <strong className="text-[var(--warning)]">Viewing as {impersonation.schoolName} (read-only).</strong>{' '}
               <span className="text-[var(--muted)]">

@@ -16,9 +16,9 @@ export type StudentRow = {
 };
 
 const statusBadge: Record<string, { label: string; className: string }> = {
-  'on-time': { label: 'On time', className: 'bg-[rgba(79,227,176,0.15)] text-[#b5f5dd]' },
-  late: { label: 'Late', className: 'bg-[rgba(255,198,107,0.15)] text-[#ffe0a6]' },
-  absent: { label: 'Absent', className: 'bg-[rgba(255,122,122,0.15)] text-[#ffb3b3]' },
+  'on-time': { label: 'On time', className: 'tone-success' },
+  late: { label: 'Late', className: 'tone-warning' },
+  absent: { label: 'Absent', className: 'tone-danger' },
 };
 
 function StudentRowActions({ student }: { student: StudentRow }) {

@@ -74,7 +74,7 @@ function ScoreTable({
       {Object.entries(hidden).map(([name, value]) => <input key={name} type="hidden" name={name} value={value} />)}
       <div className="overflow-x-auto rounded-2xl border border-[var(--border)]">
         <table className="w-full text-left text-sm">
-          <thead className="bg-white/5 text-xs uppercase tracking-wider text-[var(--muted)]">
+          <thead className="bg-[var(--hover)] text-xs uppercase tracking-wider text-[var(--muted)]">
             <tr><th className="px-4 py-3">Student</th><th className="px-4 py-3">Score (out of {max})</th></tr>
           </thead>
           <tbody className="divide-y divide-[var(--border)]">

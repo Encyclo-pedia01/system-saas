@@ -18,9 +18,9 @@ export type InsightView = {
 };
 
 const severityStyles: Record<InsightView['severity'], { badge: string; accent: string; label: string }> = {
-  high: { badge: 'bg-[rgba(255,122,122,0.15)] text-[#ffb3b3]', accent: 'from-[#ff7a7a]', label: 'High' },
-  medium: { badge: 'bg-[rgba(255,198,107,0.15)] text-[#ffe0a6]', accent: 'from-[#ffc66b]', label: 'Medium' },
-  low: { badge: 'bg-[rgba(79,227,176,0.15)] text-[#b5f5dd]', accent: 'from-[#4fe3b0]', label: 'Low' },
+  high: { badge: 'tone-danger', accent: 'from-[var(--danger)]', label: 'High' },
+  medium: { badge: 'tone-warning', accent: 'from-[var(--warning)]', label: 'Medium' },
+  low: { badge: 'tone-success', accent: 'from-[var(--success)]', label: 'Low' },
 };
 
 export function InsightCard({ insight, canResolve }: { insight: InsightView; canResolve: boolean }) {
