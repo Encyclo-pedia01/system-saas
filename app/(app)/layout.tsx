@@ -39,6 +39,7 @@ function navigationFor(viewer: Viewer): NavItem[] {
         { href: '/students', label: 'Students', icon: icons.dashboard },
         { href: '/scores', label: 'Scores', icon: icons.grading },
         { href: '/grading', label: 'Grading', icon: icons.grading },
+        { href: '/team', label: 'Team', icon: icons.dashboard },
       ];
     case 'staff':
       return [

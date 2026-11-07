@@ -39,6 +39,17 @@ export const createSchoolSchema = z.object({
   ownerEmail: z.email('Enter a valid owner email.').trim().toLowerCase(),
 });
 
+export const inviteMemberSchema = z.object({
+  email: z.email('Enter a valid email address.').trim().toLowerCase(),
+  role: z.enum(['staff', 'authority'], { message: 'Choose a role.' }),
+});
+
+export const invitationTokenSchema = z
+  .string()
+  .min(20)
+  .max(200)
+  .regex(/^[A-Za-z0-9_-]+$/, 'This invitation link is not valid.');
+
 export const toggleStatusSchema = z.object({
   institutionId: z.uuid(),
   status: z.enum(['active', 'suspended']),
