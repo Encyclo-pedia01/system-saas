@@ -72,12 +72,33 @@ export const insightActionSchema = z.object({
   insightId: z.uuid(),
 });
 
-export const classSchema = z.object({
-  name: z.string().trim().min(1, 'Enter a class name.').max(60),
+// Group names arrive as one comma-separated field, for example "A, B".
+export function parseGroupNames(raw: string): string[] {
+  return raw
+    .split(',')
+    .map((name) => name.trim())
+    .filter((name, index, all) => name.length > 0 && all.findIndex((other) => other.toLowerCase() === name.toLowerCase()) === index);
+}
+
+export const classSchema = z
+  .object({
+    name: z.string().trim().min(1, 'Enter a class name.').max(60),
+    hasGroups: z.boolean(),
+    groupNames: z.array(z.string().max(40, 'Keep group names under 40 characters.')).max(20, 'Use at most 20 groups.'),
+  })
+  .refine((value) => !value.hasGroups || value.groupNames.length > 0, {
+    path: ['groupNames'],
+    message: 'Add at least one group, such as A or B.',
+  });
+
+export const classGroupsSchema = z.object({
+  classId: z.uuid('Choose a class.'),
+  groupNames: z.array(z.string().min(1).max(40)).min(1, 'Enter at least one group name.').max(20, 'Use at most 20 groups.'),
 });
 
 export const studentSchema = z.object({
   classId: z.uuid('Choose a class.'),
+  groupId: z.uuid('Choose a group.').nullable(),
   fullName: z.string().trim().min(2, 'Enter the student’s full name.').max(120),
   admissionNumber: z.string().trim().min(1, 'Enter an admission number.').max(40),
 });

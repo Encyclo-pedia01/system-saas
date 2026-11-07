@@ -6,7 +6,14 @@ import type { ActionResult } from '@/lib/actions/result';
 import { databaseFailure, failure, fromZodError, success } from '@/lib/actions/result';
 import { resolveWriteContext } from '@/lib/auth/write-guard';
 import { createClient } from '@/lib/supabase/server';
-import { classSchema, studentSchema, subjectSchema, termSchema } from '@/lib/validation/schemas';
+import {
+  classGroupsSchema,
+  classSchema,
+  parseGroupNames,
+  studentSchema,
+  subjectSchema,
+  termSchema,
+} from '@/lib/validation/schemas';
 
 export async function createClassAction(
   _previous: ActionResult | null,
@@ -15,18 +22,75 @@ export async function createClassAction(
   const guard = await resolveWriteContext(['owner']);
   if (!guard.ok) return failure(guard.message);
 
-  const parsed = classSchema.safeParse({ name: formData.get('name') });
+  const hasGroups = formData.get('hasGroups') === 'on';
+  const parsed = classSchema.safeParse({
+    name: formData.get('name'),
+    hasGroups,
+    groupNames: hasGroups ? parseGroupNames(String(formData.get('groupNames') ?? '')) : [],
+  });
   if (!parsed.success) return fromZodError(parsed.error);
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const institutionId = guard.context.institutionId;
+  const { data: created, error } = await supabase
     .from('classes')
-    .insert({ institution_id: guard.context.institutionId, name: parsed.data.name });
+    .insert({ institution_id: institutionId, name: parsed.data.name, has_groups: parsed.data.hasGroups })
+    .select('id')
+    .single();
 
-  if (error) return databaseFailure(error, 'Could not create the class.');
+  if (error || !created) return databaseFailure(error ?? { message: 'missing row' }, 'Could not create the class.');
+
+  if (parsed.data.hasGroups) {
+    const { error: groupError } = await supabase.from('class_groups').insert(
+      parsed.data.groupNames.map((name) => ({ institution_id: institutionId, class_id: created.id, name })),
+    );
+
+    if (groupError) {
+      await supabase.from('classes').delete().eq('id', created.id);
+      return databaseFailure(groupError, 'Could not add the groups.');
+    }
+  }
 
   revalidatePath('/students');
   return success(`Class “${parsed.data.name}” created.`);
+}
+
+export async function addClassGroupsAction(
+  _previous: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await resolveWriteContext(['owner']);
+  if (!guard.ok) return failure(guard.message);
+
+  const parsed = classGroupsSchema.safeParse({
+    classId: formData.get('classId'),
+    groupNames: parseGroupNames(String(formData.get('groupNames') ?? '')),
+  });
+  if (!parsed.success) return fromZodError(parsed.error);
+
+  const supabase = await createClient();
+  const institutionId = guard.context.institutionId;
+
+  const { error: classError } = await supabase
+    .from('classes')
+    .update({ has_groups: true })
+    .eq('id', parsed.data.classId)
+    .eq('institution_id', institutionId);
+
+  if (classError) return databaseFailure(classError, 'Could not update the class.');
+
+  const { error } = await supabase.from('class_groups').insert(
+    parsed.data.groupNames.map((name) => ({
+      institution_id: institutionId,
+      class_id: parsed.data.classId,
+      name,
+    })),
+  );
+
+  if (error) return databaseFailure(error, 'Could not add the groups.');
+
+  revalidatePath('/students');
+  return success(`Groups added to the class.`);
 }
 
 export async function createStudentAction(
@@ -36,8 +100,10 @@ export async function createStudentAction(
   const guard = await resolveWriteContext(['owner']);
   if (!guard.ok) return failure(guard.message);
 
+  const rawGroup = String(formData.get('groupId') ?? '');
   const parsed = studentSchema.safeParse({
     classId: formData.get('classId'),
+    groupId: rawGroup === '' ? null : rawGroup,
     fullName: formData.get('fullName'),
     admissionNumber: formData.get('admissionNumber'),
   });
@@ -47,6 +113,7 @@ export async function createStudentAction(
   const { error } = await supabase.from('students').insert({
     institution_id: guard.context.institutionId,
     class_id: parsed.data.classId,
+    group_id: parsed.data.groupId,
     full_name: parsed.data.fullName,
     admission_number: parsed.data.admissionNumber,
   });

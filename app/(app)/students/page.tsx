@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { ClassForm, StudentForm } from '@/components/students/student-forms';
+import { ClassForm, ClassGroupsForm, StudentForm, type ClassOption } from '@/components/students/student-forms';
 import { SubjectForm, TermForm } from '@/components/students/setup-forms';
 import { EmptyState } from '@/components/ui/empty-state';
 import { GlassCard } from '@/components/ui/glass-card';
@@ -19,12 +19,20 @@ export default async function StudentsPage() {
   const institutionId = viewer.institution!.id;
   const canManage = viewer.effectiveRole === 'owner' && !viewer.readOnly;
 
-  const [classesResult, studentsResult] = await Promise.all([
-    supabase.from('classes').select('id, name').eq('institution_id', institutionId).order('name'),
-    supabase.from('students').select('id, class_id, full_name, admission_number').eq('institution_id', institutionId).order('full_name'),
+  const [classesResult, groupsResult, studentsResult] = await Promise.all([
+    supabase.from('classes').select('id, name, has_groups').eq('institution_id', institutionId).order('name'),
+    supabase.from('class_groups').select('id, class_id, name').eq('institution_id', institutionId).order('name'),
+    supabase.from('students').select('id, class_id, group_id, full_name, admission_number').eq('institution_id', institutionId).order('full_name'),
   ]);
 
-  const classes = classesResult.data ?? [];
+  const groups = groupsResult.data ?? [];
+  const classes: ClassOption[] = (classesResult.data ?? []).map((c) => ({
+    id: c.id,
+    name: c.name,
+    hasGroups: c.has_groups,
+    groups: groups.filter((g) => g.class_id === c.id),
+  }));
+  const groupNameById = new Map(groups.map((g) => [g.id, g.name]));
   const students = studentsResult.data ?? [];
 
   return (
@@ -57,12 +65,15 @@ export default async function StudentsPage() {
                 <h2 id={`cls-${schoolClass.id}`} className="text-base font-semibold">{schoolClass.name}</h2>
                 <span className="badge bg-[var(--hover)] text-[var(--muted)]">{members.length}</span>
               </div>
-              <ul className="divide-y divide-[var(--border)] text-sm">
+              {canManage && <ClassGroupsForm classId={schoolClass.id} />}
+              <ul className="mt-3 divide-y divide-[var(--border)] text-sm">
                 {members.length === 0 && <li className="py-3 text-sm text-[var(--muted)]">No students enrolled.</li>}
                 {members.map((s) => (
                   <li key={s.id} className="flex items-center justify-between py-2.5">
                     <span className="font-medium">{s.full_name}</span>
-                    <span className="text-xs text-[var(--muted)]">{s.admission_number}</span>
+                    <span className="text-xs text-[var(--muted)]">
+                      {s.group_id && groupNameById.get(s.group_id) ? `${schoolClass.name} ${groupNameById.get(s.group_id)} · ` : ''}{s.admission_number}
+                    </span>
                   </li>
                 ))}
               </ul>
