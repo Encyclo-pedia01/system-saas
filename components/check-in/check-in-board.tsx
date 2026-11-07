@@ -34,13 +34,13 @@ function StudentRowActions({ student }: { student: StudentRow }) {
     <div className="flex flex-wrap gap-2">
       <form action={checkAction}>
         <input type="hidden" name="studentId" value={student.student_id} />
-        <button type="submit" className="btn btn-primary min-h-9 px-4 text-sm" disabled={alreadyRecorded || busy}>
+        <button type="submit" className="btn btn-primary min-h-11 px-5 text-sm" disabled={alreadyRecorded || busy}>
           {checkPending ? 'Recording…' : 'Check in'}
         </button>
       </form>
       <form action={absentAction}>
         <input type="hidden" name="studentId" value={student.student_id} />
-        <button type="submit" className="btn btn-ghost min-h-9 px-4 text-sm" disabled={alreadyRecorded || busy}>
+        <button type="submit" className="btn btn-ghost min-h-11 px-5 text-sm" disabled={alreadyRecorded || busy}>
           {absentPending ? 'Saving…' : 'Absent'}
         </button>
       </form>
@@ -82,7 +82,7 @@ export function CheckInBoard({ students }: { students: StudentRow[] }) {
               {rows.map((student) => {
                 const badge = student.today_status ? statusBadge[student.today_status] : null;
                 return (
-                  <li key={student.student_id} className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+                  <li key={student.student_id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
                       <p className="truncate font-medium">{student.full_name}</p>
                       {badge && (
