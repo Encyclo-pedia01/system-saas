@@ -27,7 +27,7 @@ export default function LoginScene() {
       </Float>
 
       <Float speed={1} floatIntensity={1.8}>
-        <Sphere args={[0.9, 64, 64]} position={[0.6, 1.9, -2.5]}>
+        <Sphere args={[0.9, 64, 64]} position={[3.4, 2.4, -3]}>
           <MeshDistortMaterial color={DEEP_NAVY} distort={0.35} speed={1.5} roughness={0.2} />
         </Sphere>
       </Float>
