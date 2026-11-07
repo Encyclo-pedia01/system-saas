@@ -26,6 +26,10 @@ export type Viewer = {
   // Owner-level pages render for impersonated sessions, but writes are blocked.
   effectiveRole: AppRole | null;
   readOnly: boolean;
+  // aal2 means the user signed in with a second factor (authenticator code) this session.
+  assuranceLevel: 'aal1' | 'aal2';
+  // True when the account already has a verified authenticator app.
+  mfaEnrolled: boolean;
 };
 
 type MembershipRow = { role: AppRole; institution: InstitutionSummary | null };
@@ -46,11 +50,15 @@ export async function getViewer(): Promise<Viewer | null> {
     .maybeSingle();
 
   const isSuperAdmin = profile?.is_super_admin ?? false;
+  const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  const mfaEnrolled = assurance?.nextLevel === 'aal2';
   const base = {
+    mfaEnrolled,
     userId: user.id,
     email: user.email ?? '',
     fullName: profile?.full_name ?? '',
     isSuperAdmin,
+    assuranceLevel: assurance?.currentLevel === 'aal2' ? ('aal2' as const) : ('aal1' as const),
   };
 
   if (isSuperAdmin) {
@@ -118,6 +126,11 @@ export async function requireViewer(): Promise<Viewer> {
 export async function requireSchoolViewer(): Promise<Viewer> {
   const viewer = await requireViewer();
 
+  const mfaRedirect = mfaRedirectFor(viewer);
+  if (mfaRedirect) {
+    redirect(mfaRedirect);
+  }
+
   if (viewer.isSuperAdmin && !viewer.impersonation) {
     redirect('/admin');
   }
@@ -131,6 +144,16 @@ export async function requireSchoolViewer(): Promise<Viewer> {
   }
 
   return viewer;
+}
+
+// Owners must confirm an authenticator code before they can use school pages or make changes.
+// Returns where to send them, or null when they are fine to continue.
+export function mfaRedirectFor(viewer: Viewer): string | null {
+  if (viewer.isSuperAdmin || viewer.impersonation || viewer.role !== 'owner') {
+    return null;
+  }
+
+  return viewer.assuranceLevel === 'aal2' ? null : viewer.mfaEnrolled ? '/mfa/verify' : '/mfa/setup';
 }
 
 export async function requireEffectiveRole(allowed: AppRole[]): Promise<Viewer> {

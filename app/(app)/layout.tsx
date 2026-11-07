@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 
 import { AppShell, type NavItem } from '@/components/shell/app-shell';
-import { requireViewer, type Viewer } from '@/lib/auth/viewer';
+import { mfaRedirectFor, requireViewer, type Viewer } from '@/lib/auth/viewer';
 import { signOutAction } from '@/app/actions/auth';
 import { stopImpersonationAction } from './admin/actions';
 
@@ -57,6 +57,11 @@ function navigationFor(viewer: Viewer): NavItem[] {
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const viewer = await requireViewer();
+
+  const mfaRedirect = mfaRedirectFor(viewer);
+  if (mfaRedirect) {
+    redirect(mfaRedirect);
+  }
   const isPlatformView = viewer.isSuperAdmin && !viewer.impersonation;
 
   if (!isPlatformView) {

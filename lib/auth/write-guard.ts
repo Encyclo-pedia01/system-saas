@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { assertWritable, getViewer, type AppRole } from '@/lib/auth/viewer';
+import { assertWritable, getViewer, mfaRedirectFor, type AppRole } from '@/lib/auth/viewer';
 
 export type WriteContext = { userId: string; institutionId: string };
 export type WriteGuardResult = { ok: true; context: WriteContext } | { ok: false; message: string };
@@ -22,6 +22,10 @@ export async function resolveWriteContext(allowed: AppRole[]): Promise<WriteGuar
 
   if (readOnlyMessage) {
     return { ok: false, message: readOnlyMessage };
+  }
+
+  if (mfaRedirectFor(viewer)) {
+    return { ok: false, message: 'Confirm your sign-in code before making changes.' };
   }
 
   return {
