@@ -34,7 +34,7 @@ export function CookieBanner() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 24 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}
-          className="glass fixed bottom-16 left-4 right-4 z-50 mx-auto max-w-md p-5 sm:bottom-14 sm:left-6 sm:right-auto sm:mx-0"
+          className="glass fixed bottom-16 left-4 right-4 z-50 mx-auto max-w-md p-5 sm:bottom-14 sm:left-auto sm:right-6 sm:mx-0"
         >
           <p className="text-sm text-[var(--muted)]">
             We use essential cookies to keep you signed in. Read our{' '}
