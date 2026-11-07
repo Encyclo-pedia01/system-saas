@@ -36,10 +36,16 @@ function navigationFor(viewer: Viewer): NavItem[] {
     case 'owner':
       return [
         { href: '/dashboard', label: 'Dashboard', icon: icons.dashboard },
+        { href: '/students', label: 'Students', icon: icons.dashboard },
+        { href: '/scores', label: 'Scores', icon: icons.grading },
         { href: '/grading', label: 'Grading', icon: icons.grading },
       ];
     case 'staff':
-      return [{ href: '/dashboard', label: 'Dashboard', icon: icons.dashboard }];
+      return [
+        { href: '/dashboard', label: 'Dashboard', icon: icons.dashboard },
+        { href: '/students', label: 'Students', icon: icons.dashboard },
+        { href: '/scores', label: 'Scores', icon: icons.grading },
+      ];
     case 'authority':
       return [{ href: '/check-in', label: 'Check-in', icon: icons.checkIn }];
     default:
