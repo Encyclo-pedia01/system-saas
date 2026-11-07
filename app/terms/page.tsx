@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 
+import { LegalCloseButton } from '@/components/legal/legal-close-button';
 import { GlassCard } from '@/components/ui/glass-card';
 
 export const metadata: Metadata = {
@@ -10,7 +11,8 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-16">
-      <GlassCard className="p-8 sm:p-10">
+      <GlassCard className="relative p-8 sm:p-10">
+        <LegalCloseButton />
         <h1 className="text-3xl font-bold">Terms of service</h1>
         <p className="mt-2 text-xs text-[var(--muted)]">Draft for review by legal counsel before launch.</p>
         <div className="mt-6 space-y-4 text-sm leading-relaxed text-[var(--muted)]">

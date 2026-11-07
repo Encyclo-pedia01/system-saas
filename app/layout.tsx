@@ -28,7 +28,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en-GB">
       <body className="flex min-h-screen flex-col antialiased">
-        <Suspense fallback={null}>{children}</Suspense>
+        <div className="flex flex-1 flex-col">
+          <Suspense fallback={null}>{children}</Suspense>
+        </div>
         <SiteFooter />
         <Toaster />
         <CookieBanner />
