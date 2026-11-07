@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 
+import { signOutAction } from '@/app/actions/auth';
 import { ScenePoster } from '@/components/3d/scene-poster';
 import { SubmitButton } from '@/components/ui/submit-button';
-import { GlassCard } from '@/components/ui/glass-card';
-import { signOutAction } from '@/app/actions/auth';
+import { statusIconProps, StatusCard } from '@/components/ui/status-card';
 
 export const metadata: Metadata = {
   title: 'School suspended',
@@ -14,15 +14,23 @@ export default function SuspendedPage() {
   return (
     <main className="relative flex flex-1 items-center justify-center overflow-hidden px-6 py-16">
       <ScenePoster />
-      <GlassCard className="relative w-full max-w-md p-10 text-center">
-        <h1 className="text-2xl font-bold">This school is suspended</h1>
-        <p className="mt-4 text-[var(--muted)]">
-          Access is paused while the account is under review. Contact the platform administrator for help.
-        </p>
-        <form action={signOutAction} className="mt-8">
-          <SubmitButton variant="ghost" pendingLabel="Signing out…">Sign out</SubmitButton>
-        </form>
-      </GlassCard>
+      <StatusCard
+        title="This school is suspended"
+        tone="danger"
+        icon={
+          <svg {...statusIconProps} aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M10 9v6M14 9v6" />
+          </svg>
+        }
+        actions={
+          <form action={signOutAction}>
+            <SubmitButton variant="ghost" pendingLabel="Signing out…">Sign out</SubmitButton>
+          </form>
+        }
+      >
+        Access is paused while the account is under review. Contact the platform administrator for help.
+      </StatusCard>
     </main>
   );
 }

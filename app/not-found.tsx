@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { ScenePoster } from '@/components/3d/scene-poster';
-import { GlassCard } from '@/components/ui/glass-card';
+import { statusIconProps, StatusCard } from '@/components/ui/status-card';
 
 export const metadata: Metadata = {
   title: 'Page not found',
@@ -13,16 +13,24 @@ export default function NotFound() {
   return (
     <main className="relative flex flex-1 items-center justify-center overflow-hidden px-6 py-16">
       <ScenePoster />
-      <GlassCard className="relative w-full max-w-md p-10 text-center">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent-soft)]">Error 404</p>
-        <h1 className="mt-3 text-4xl font-bold">Lost in the grid</h1>
-        <p className="mt-4 text-[var(--muted)]">
-          This page does not exist, or it may have moved. Head back to your dashboard.
-        </p>
-        <Link href="/dashboard" className="btn btn-primary mt-8">
-          Return to dashboard
-        </Link>
-      </GlassCard>
+      <StatusCard
+        code="Error 404"
+        title="We could not find that page"
+        icon={
+          <svg {...statusIconProps} aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M15.5 8.5l-2 5-5 2 2-5 5-2z" />
+          </svg>
+        }
+        actions={
+          <>
+            <Link href="/dashboard" className="btn btn-primary">Go to dashboard</Link>
+            <Link href="/login" className="btn btn-ghost">Sign in</Link>
+          </>
+        }
+      >
+        The link may be broken, or the page may have moved. Check the address, or head back to your dashboard.
+      </StatusCard>
     </main>
   );
 }
