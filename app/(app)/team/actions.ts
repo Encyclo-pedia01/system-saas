@@ -11,8 +11,6 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { inviteMemberSchema } from '@/lib/validation/schemas';
 
-const invitationDays = 7;
-
 // Redirect after the invitation email link: sign in, set a password, then accept.
 function inviteRedirect(token: string): string {
   const afterPassword = `/set-password?next=${encodeURIComponent(`/invite/${token}`)}`;
@@ -43,7 +41,6 @@ export async function inviteMemberAction(
     role,
     invited_by: guard.context.userId,
     token_hash: hashInvitationToken(token),
-    expires_at: new Date(Date.now() + invitationDays * 24 * 60 * 60 * 1000).toISOString(),
   });
 
   if (error) {

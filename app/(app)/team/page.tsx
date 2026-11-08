@@ -44,7 +44,7 @@ export default async function TeamPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader eyebrow="Team" title="Team" description={<>Invite teachers. Each invitation works once and expires after 7 days.</>} />
+      <PageHeader eyebrow="Team" title="Team" description={<>Invite teachers and authority staff. Each invitation works once. Teacher links expire 30 minutes after they are sent. Authority links expire after 7 days.</>} />
 
       {canInvite && (
         <GlassCard className="p-6 sm:p-8">
@@ -80,7 +80,7 @@ export default async function TeamPage() {
                 <li key={invite.id} className="flex items-center justify-between gap-4 py-3">
                   <div className="min-w-0">
                     <p className="truncate font-medium">{invite.email}</p>
-                    <p className="text-xs text-[var(--muted)]">{roleLabels[invite.role] ?? invite.role} · expires {new Date(invite.expires_at).toLocaleDateString('en-GB')}</p>
+                    <p className="text-xs text-[var(--muted)]">{roleLabels[invite.role] ?? invite.role} · expires {new Date(invite.expires_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Accra' })}</p>
                   </div>
                   {canRevoke && (
                     <form action={revokeInvitationAction}>

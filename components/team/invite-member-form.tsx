@@ -48,7 +48,7 @@ export function InviteMemberForm() {
         <div className="space-y-2 rounded-lg border border-[var(--border)] p-4">
           <p className="text-sm text-[var(--muted)]">
             {state?.ok && state.data?.emailed ? 'Share this link too, in case the email is delayed. ' : 'Share this link with them. '}
-            It works once and expires in 7 days.
+            It works once. Teacher links expire 30 minutes after they are sent. Authority links expire in 7 days.
           </p>
           <div className="flex gap-2">
             <input readOnly value={link} aria-label="Invitation link" className="field-input text-xs" onFocus={(event) => event.currentTarget.select()} />
