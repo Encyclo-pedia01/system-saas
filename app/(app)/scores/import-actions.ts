@@ -55,7 +55,7 @@ export async function importScoresAction(
   _previous: ActionResult | null,
   formData: FormData,
 ): Promise<ActionResult<{ saved: number; replaced: number }>> {
-  const guard = await resolveWriteContext(['owner', 'staff']);
+  const guard = await resolveWriteContext(['owner', 'school_admin', 'staff']);
   if (!guard.ok) return failure(guard.message);
 
   let payload: unknown;

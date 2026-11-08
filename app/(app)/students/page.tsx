@@ -15,10 +15,11 @@ export const metadata: Metadata = {
 };
 
 export default async function StudentsPage() {
-  const viewer = await requireEffectiveRole(['owner', 'staff']);
+  const viewer = await requireEffectiveRole(['owner', 'school_admin', 'staff']);
   const supabase = await createClient();
   const institutionId = viewer.institution!.id;
-  const canManage = viewer.effectiveRole === 'owner' && !viewer.readOnly;
+  const canStructure = viewer.effectiveRole === 'owner' && !viewer.readOnly;
+  const canEnrol = (viewer.effectiveRole === 'owner' || viewer.effectiveRole === 'school_admin') && !viewer.readOnly;
 
   const [classesResult, groupsResult, studentsResult] = await Promise.all([
     supabase.from('classes').select('id, name, has_groups').eq('institution_id', institutionId).order('name'),
@@ -40,16 +41,18 @@ export default async function StudentsPage() {
     <div className="space-y-8">
       <PageHeader eyebrow="Records" title="Students" description={<>{students.length} students across {classes.length} classes.</>} />
 
-      {canManage && (
+      {(canStructure || canEnrol) && (
         <div className="grid gap-6 lg:grid-cols-2">
-          <GlassCard className="p-6"><h2 className="mb-4 text-lg font-semibold">Add a class</h2><ClassForm /></GlassCard>
-          <GlassCard className="p-6"><h2 className="mb-4 text-lg font-semibold">Enrol a student</h2>
-            {classes.length === 0 ? <p className="text-sm text-[var(--muted)]">Add a class first.</p> : <StudentForm classes={classes} />}
-          </GlassCard>
+          {canStructure && <GlassCard className="p-6"><h2 className="mb-4 text-lg font-semibold">Add a class</h2><ClassForm /></GlassCard>}
+          {canEnrol && (
+            <GlassCard className="p-6"><h2 className="mb-4 text-lg font-semibold">Enrol a student</h2>
+              {classes.length === 0 ? <p className="text-sm text-[var(--muted)]">Add a class first.</p> : <StudentForm classes={classes} />}
+            </GlassCard>
+          )}
         </div>
       )}
 
-      {canManage && classes.length > 0 && (
+      {canEnrol && classes.length > 0 && (
         <GlassCard className="p-6">
           <h2 className="mb-1 text-lg font-semibold">Upload students from a file</h2>
           <p className="mb-5 text-sm text-[var(--muted)]">Pick the class (and group, if it has one), then choose a file. You&apos;ll see a preview before anything is saved.</p>
@@ -57,7 +60,7 @@ export default async function StudentsPage() {
         </GlassCard>
       )}
 
-      {canManage && (
+      {canStructure && (
         <div className="grid gap-6 lg:grid-cols-2">
           <GlassCard className="p-6"><h2 className="mb-4 text-lg font-semibold">Add a subject</h2><SubjectForm /></GlassCard>
           <GlassCard className="p-6"><h2 className="mb-4 text-lg font-semibold">Add a term</h2><TermForm /></GlassCard>
@@ -74,7 +77,7 @@ export default async function StudentsPage() {
                 <h2 id={`cls-${schoolClass.id}`} className="text-base font-semibold">{schoolClass.name}</h2>
                 <span className="badge bg-[var(--hover)] text-[var(--muted)]">{members.length}</span>
               </div>
-              {canManage && <ClassGroupsForm classId={schoolClass.id} />}
+              {canStructure && <ClassGroupsForm classId={schoolClass.id} />}
               <ul className="mt-3 divide-y divide-[var(--border)] text-sm">
                 {members.length === 0 && <li className="py-3 text-sm text-[var(--muted)]">No students enrolled.</li>}
                 {members.map((s) => (

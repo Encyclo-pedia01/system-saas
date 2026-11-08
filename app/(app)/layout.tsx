@@ -20,6 +20,7 @@ const icons = {
 
 const roleLabels: Record<string, string> = {
   owner: 'School owner',
+  school_admin: 'Encyclopedia',
   staff: 'Teacher',
   authority: 'Check-in officer',
 };
@@ -41,6 +42,13 @@ function navigationFor(viewer: Viewer): NavItem[] {
         { href: '/grading', label: 'Grading', icon: icons.grading },
         { href: '/team', label: 'Team', icon: icons.dashboard },
         { href: '/backup', label: 'Backup', icon: icons.dashboard },
+      ];
+    case 'school_admin':
+      return [
+        { href: '/dashboard', label: 'Dashboard', icon: icons.dashboard },
+        { href: '/students', label: 'Students', icon: icons.dashboard },
+        { href: '/scores', label: 'Scores', icon: icons.grading },
+        { href: '/team', label: 'Team', icon: icons.dashboard },
       ];
     case 'staff':
       return [

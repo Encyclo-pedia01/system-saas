@@ -16,14 +16,16 @@ export const metadata: Metadata = {
 
 const roleLabels: Record<string, string> = {
   owner: 'School owner',
+  school_admin: 'Encyclopedia',
   staff: 'Teacher',
 };
 
 export default async function TeamPage() {
-  const viewer = await requireEffectiveRole(['owner']);
+  const viewer = await requireEffectiveRole(['owner', 'school_admin']);
   const supabase = await createClient();
   const institutionId = viewer.institution!.id;
-  const canManage = !viewer.readOnly;
+  const canInvite = !viewer.readOnly;
+  const canRevoke = viewer.effectiveRole === 'owner' && !viewer.readOnly;
 
   const [membersResult, invitesResult] = await Promise.all([
     supabase.from('memberships').select('id, role, created_at').eq('institution_id', institutionId).order('created_at'),
@@ -44,7 +46,7 @@ export default async function TeamPage() {
     <div className="space-y-8">
       <PageHeader eyebrow="Team" title="Team" description={<>Invite teachers. Each invitation works once and expires after 7 days.</>} />
 
-      {canManage && (
+      {canInvite && (
         <GlassCard className="p-6 sm:p-8">
           <h2 className="mb-5 text-lg font-semibold">Invite a team member</h2>
           <InviteMemberForm />
@@ -80,7 +82,7 @@ export default async function TeamPage() {
                     <p className="truncate font-medium">{invite.email}</p>
                     <p className="text-xs text-[var(--muted)]">{roleLabels[invite.role] ?? invite.role} · expires {new Date(invite.expires_at).toLocaleDateString('en-GB')}</p>
                   </div>
-                  {canManage && (
+                  {canRevoke && (
                     <form action={revokeInvitationAction}>
                       <input type="hidden" name="invitationId" value={invite.id} />
                       <SubmitButton variant="ghost" pendingLabel="Cancelling…">Cancel</SubmitButton>

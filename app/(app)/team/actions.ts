@@ -23,7 +23,7 @@ export async function inviteMemberAction(
   _previous: ActionResult | null,
   formData: FormData,
 ): Promise<ActionResult<{ link: string; emailed: boolean }>> {
-  const guard = await resolveWriteContext(['owner']);
+  const guard = await resolveWriteContext(['owner', 'school_admin']);
   if (!guard.ok) return failure(guard.message);
 
   const parsed = inviteMemberSchema.safeParse({

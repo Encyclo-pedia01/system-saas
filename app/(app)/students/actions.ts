@@ -98,7 +98,7 @@ export async function importStudentsAction(
   _previous: ActionResult | null,
   formData: FormData,
 ): Promise<ActionResult> {
-  const guard = await resolveWriteContext(['owner']);
+  const guard = await resolveWriteContext(['owner', 'school_admin']);
   if (!guard.ok) return failure(guard.message);
 
   let payload: unknown;
@@ -178,7 +178,7 @@ export async function createStudentAction(
   _previous: ActionResult | null,
   formData: FormData,
 ): Promise<ActionResult> {
-  const guard = await resolveWriteContext(['owner']);
+  const guard = await resolveWriteContext(['owner', 'school_admin']);
   if (!guard.ok) return failure(guard.message);
 
   const rawGroup = String(formData.get('groupId') ?? '');

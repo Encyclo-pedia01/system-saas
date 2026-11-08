@@ -5,7 +5,8 @@ import { notFound, redirect } from 'next/navigation';
 import { readTemporaryPasswordState } from '@/lib/auth/temporary-password';
 import { createClient } from '@/lib/supabase/server';
 
-export type AppRole = 'owner' | 'staff' | 'authority';
+// school_admin is shown as Encyclopedia in the interface (DECISIONS.md, item 15).
+export type AppRole = 'owner' | 'school_admin' | 'staff' | 'authority';
 export type InstitutionStatus = 'active' | 'suspended';
 
 export type InstitutionSummary = {

@@ -62,7 +62,7 @@ export async function saveAssessmentScoresAction(
   _previous: ActionResult | null,
   formData: FormData,
 ): Promise<ActionResult> {
-  const guard = await resolveWriteContext(['owner', 'staff']);
+  const guard = await resolveWriteContext(['owner', 'school_admin', 'staff']);
   if (!guard.ok) return failure(guard.message);
 
   const assessmentId = formData.get('assessmentId');
@@ -96,7 +96,7 @@ export async function saveExamScoresAction(
   _previous: ActionResult | null,
   formData: FormData,
 ): Promise<ActionResult> {
-  const guard = await resolveWriteContext(['owner', 'staff']);
+  const guard = await resolveWriteContext(['owner', 'school_admin', 'staff']);
   if (!guard.ok) return failure(guard.message);
 
   const context = examScoreContextSchema.safeParse({

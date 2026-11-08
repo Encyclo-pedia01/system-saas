@@ -21,7 +21,7 @@ function first(value: string | string[] | undefined): string | undefined {
 }
 
 export default async function ScoresPage({ searchParams }: { searchParams: SearchParams }) {
-  const viewer = await requireEffectiveRole(['owner', 'staff']);
+  const viewer = await requireEffectiveRole(['owner', 'school_admin', 'staff']);
   const params = await searchParams;
   const supabase = await createClient();
   const institutionId = viewer.institution!.id;

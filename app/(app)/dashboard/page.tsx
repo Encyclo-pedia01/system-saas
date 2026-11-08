@@ -42,7 +42,7 @@ export default async function DashboardPage() {
 
   const supabase = await createClient();
   const institutionId = viewer.institution!.id;
-  const canResolve = viewer.effectiveRole === 'owner' && !viewer.readOnly;
+  const canResolve = (viewer.effectiveRole === 'owner' || viewer.effectiveRole === 'school_admin') && !viewer.readOnly;
 
   const { data: localDate } = await supabase.rpc('institution_local_date', { p_institution_id: institutionId });
   const today = String(localDate ?? '');

@@ -14,7 +14,7 @@ export async function resolveInsightAction(
 ): Promise<ActionResult> {
   const viewer = await getViewer();
 
-  if (!viewer || viewer.effectiveRole !== 'owner') {
+  if (!viewer || (viewer.effectiveRole !== 'owner' && viewer.effectiveRole !== 'school_admin')) {
     return failure('Only the school owner can resolve insights.');
   }
 
