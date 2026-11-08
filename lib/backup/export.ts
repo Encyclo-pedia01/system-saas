@@ -17,6 +17,9 @@ export const exportTables = [
   'grading_keys',
   'results',
   'insights',
+  'fee_items',
+  'fee_charges',
+  'fee_payments',
 ] as const;
 
 const pageSize = 1000;
