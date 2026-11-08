@@ -390,7 +390,7 @@ begin
             where gb.institution_id = v_student.institution_id and gb.min_score <= sr.final_grade
             order by gb.min_score desc limit 1
           ),
-          'remark', (
+          'label', (
             select gb.label from public.grade_bands gb
             where gb.institution_id = v_student.institution_id and gb.min_score <= sr.final_grade
             order by gb.min_score desc limit 1
