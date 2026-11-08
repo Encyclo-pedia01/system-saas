@@ -50,6 +50,21 @@ export const invitationTokenSchema = z
   .max(200)
   .regex(/^[A-Za-z0-9_-]+$/, 'This invitation link is not valid.');
 
+export const subscriptionSchema = z.object({
+  institutionId: z.uuid(),
+  plan: z.enum(['trial', 'paid'], { message: 'Choose a plan.' }),
+  subscriptionEndsOn: z
+    .string()
+    .trim()
+    .refine((value) => value === '' || /^\d{4}-\d{2}-\d{2}$/.test(value), 'Use a valid date.')
+    .transform((value) => (value === '' ? null : value)),
+  licenceReference: z
+    .string()
+    .trim()
+    .max(80, 'Use at most 80 characters.')
+    .transform((value) => (value === '' ? null : value)),
+});
+
 export const toggleStatusSchema = z.object({
   institutionId: z.uuid(),
   status: z.enum(['active', 'suspended']),

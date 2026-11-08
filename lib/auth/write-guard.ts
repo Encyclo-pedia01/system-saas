@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { assertWritable, getViewer, mfaRedirectFor, type AppRole } from '@/lib/auth/viewer';
+import { createClient } from '@/lib/supabase/server';
 
 export type WriteContext = { userId: string; institutionId: string };
 export type WriteGuardResult = { ok: true; context: WriteContext } | { ok: false; message: string };
@@ -26,6 +27,23 @@ export async function resolveWriteContext(allowed: AppRole[]): Promise<WriteGuar
 
   if (mfaRedirectFor(viewer)) {
     return { ok: false, message: 'Confirm your sign-in code before making changes.' };
+  }
+
+  // Schools past the grace period are read-only. Records can still be viewed and exported.
+  const supabase = await createClient();
+  const { data: accessState, error: accessError } = await supabase.rpc('institution_access_state', {
+    p_institution_id: viewer.institution.id,
+  });
+
+  if (accessError) {
+    return { ok: false, message: 'Could not check the school subscription. Try again.' };
+  }
+
+  if (accessState === 'expired') {
+    return {
+      ok: false,
+      message: "This school's subscription has ended, so changes are paused. Records can still be viewed and exported. Ask the platform administrator to renew it.",
+    };
   }
 
   return {

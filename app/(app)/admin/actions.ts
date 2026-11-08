@@ -12,6 +12,7 @@ import { createClient } from '@/lib/supabase/server';
 import {
   createSchoolSchema,
   impersonationSchema,
+  subscriptionSchema,
   toggleStatusSchema,
 } from '@/lib/validation/schemas';
 
@@ -117,6 +118,46 @@ export async function createSchoolAction(
     `School created. Copy the owner's invitation link and send it to ${input.ownerEmail}.`,
     { institutionId: institution.id, inviteLink },
   );
+}
+
+// Changes a school's plan, paid-until date, and licence reference. Owners cannot change these
+// (institutions can only be updated by the platform administrator). Changes are audited automatically.
+export async function updateSubscriptionAction(
+  _previous: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  if (!(await requireSuperAdminId())) {
+    return failure('You do not have permission to do that.');
+  }
+
+  const parsed = subscriptionSchema.safeParse({
+    institutionId: formData.get('institutionId'),
+    plan: formData.get('plan'),
+    subscriptionEndsOn: formData.get('subscriptionEndsOn') ?? '',
+    licenceReference: formData.get('licenceReference') ?? '',
+  });
+
+  if (!parsed.success) {
+    return fromZodError(parsed.error);
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('institutions')
+    .update({
+      plan: parsed.data.plan,
+      subscription_ends_on: parsed.data.subscriptionEndsOn,
+      licence_reference: parsed.data.licenceReference,
+    })
+    .eq('id', parsed.data.institutionId)
+    .select('name')
+    .maybeSingle();
+
+  if (error) return databaseFailure(error, 'Could not update the subscription.');
+  if (!data) return failure('That school could not be found.');
+
+  revalidatePath('/admin');
+  return success(`Subscription updated for ${data.name}.`);
 }
 
 export async function toggleSchoolStatusAction(
