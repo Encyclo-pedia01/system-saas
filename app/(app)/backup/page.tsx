@@ -25,7 +25,7 @@ export default async function BackupPage() {
         <div>
           <h2 className="text-lg font-semibold">Download a backup</h2>
           <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
-            The file contains your students, classes, groups, subjects, terms, assessments, scores, results, insights, and fee records (fee items, charges, and payments), as JSON. It does not include staff passwords or sign-in details.
+            The file contains your students, classes, groups, subjects, terms, assessments, scores, results, insights, fee records (fee items, charges, and payments), and report card records (grade bands, class teachers, remarks, and final cards), as JSON. It does not include staff passwords or sign-in details.
           </p>
         </div>
 

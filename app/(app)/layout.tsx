@@ -41,6 +41,7 @@ function navigationFor(viewer: Viewer): NavItem[] {
         { href: '/scores', label: 'Scores', icon: icons.grading },
         { href: '/fees', label: 'Fees', icon: icons.grading },
         { href: '/grading', label: 'Grading', icon: icons.grading },
+        { href: '/report-cards', label: 'Report cards', icon: icons.grading },
         { href: '/team', label: 'Team', icon: icons.dashboard },
         { href: '/backup', label: 'Backup', icon: icons.dashboard },
       ];
@@ -50,6 +51,7 @@ function navigationFor(viewer: Viewer): NavItem[] {
         { href: '/students', label: 'Students', icon: icons.dashboard },
         { href: '/scores', label: 'Scores', icon: icons.grading },
         { href: '/fees', label: 'Fees', icon: icons.grading },
+        { href: '/report-cards', label: 'Report cards', icon: icons.grading },
         { href: '/team', label: 'Team', icon: icons.dashboard },
       ];
     case 'staff':
@@ -57,6 +59,7 @@ function navigationFor(viewer: Viewer): NavItem[] {
         { href: '/dashboard', label: 'Dashboard', icon: icons.dashboard },
         { href: '/students', label: 'Students', icon: icons.dashboard },
         { href: '/scores', label: 'Scores', icon: icons.grading },
+        { href: '/report-cards', label: 'Report cards', icon: icons.grading },
       ];
     case 'authority':
       return [];

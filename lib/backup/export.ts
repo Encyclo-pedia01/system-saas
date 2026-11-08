@@ -20,6 +20,10 @@ export const exportTables = [
   'fee_items',
   'fee_charges',
   'fee_payments',
+  'grade_bands',
+  'class_teachers',
+  'report_remarks',
+  'report_finals',
 ] as const;
 
 const pageSize = 1000;
