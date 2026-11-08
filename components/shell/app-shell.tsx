@@ -78,10 +78,15 @@ export function AppShell({
     };
   }, [drawerOpen]);
 
+  // Only the most specific matching item is active, so /admin/users does not also light up /admin.
+  const activeHref = navItems
+    .filter((item) => pathname === item.href || pathname.startsWith(`${item.href}/`))
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+
   const navigation = (
     <nav className="flex flex-col gap-1" aria-label="Main">
       {navItems.map((item) => {
-        const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+        const active = item.href === activeHref;
 
         return (
           <Link

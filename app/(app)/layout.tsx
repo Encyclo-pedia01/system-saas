@@ -29,7 +29,10 @@ const roleLabels: Record<string, string> = {
 
 function navigationFor(viewer: Viewer): NavItem[] {
   if (viewer.isSuperAdmin && !viewer.impersonation) {
-    return [{ href: '/admin', label: 'Platform', icon: icons.platform }];
+    return [
+      { href: '/admin', label: 'Schools', icon: icons.platform },
+      { href: '/admin/users', label: 'Users', icon: icons.platform },
+    ];
   }
 
   switch (viewer.effectiveRole) {
