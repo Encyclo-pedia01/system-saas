@@ -2,6 +2,7 @@ import 'server-only';
 
 import { notFound, redirect } from 'next/navigation';
 
+import { readTemporaryPasswordState } from '@/lib/auth/temporary-password';
 import { createClient } from '@/lib/supabase/server';
 
 export type AppRole = 'owner' | 'staff' | 'authority';
@@ -30,6 +31,8 @@ export type Viewer = {
   assuranceLevel: 'aal1' | 'aal2';
   // True when the account already has a verified authenticator app.
   mfaEnrolled: boolean;
+  // True after an administrator set a temporary password. The user must choose their own before using the app.
+  mustChangePassword: boolean;
 };
 
 type MembershipRow = { role: AppRole; institution: InstitutionSummary | null };
@@ -52,8 +55,10 @@ export async function getViewer(): Promise<Viewer | null> {
   const isSuperAdmin = profile?.is_super_admin ?? false;
   const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   const mfaEnrolled = assurance?.nextLevel === 'aal2';
+  const temporaryPassword = readTemporaryPasswordState(user.app_metadata);
   const base = {
     mfaEnrolled,
+    mustChangePassword: temporaryPassword.mustChange,
     userId: user.id,
     email: user.email ?? '',
     fullName: profile?.full_name ?? '',
@@ -117,6 +122,10 @@ export async function requireViewer(): Promise<Viewer> {
 
   if (!viewer) {
     redirect('/login');
+  }
+
+  if (viewer.mustChangePassword) {
+    redirect('/set-password?forced=1');
   }
 
   return viewer;

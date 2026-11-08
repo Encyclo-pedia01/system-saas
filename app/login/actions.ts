@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import type { ActionResult } from '@/lib/actions/result';
 import { failure, fromZodError } from '@/lib/actions/result';
 import { safeNextPath } from '@/lib/auth/safe-next';
+import { readTemporaryPasswordState } from '@/lib/auth/temporary-password';
 import { getViewer } from '@/lib/auth/viewer';
 import { createClient } from '@/lib/supabase/server';
 import { loginSchema } from '@/lib/validation/schemas';
@@ -29,10 +30,22 @@ export async function signInAction(
     return failure('Email or password is incorrect.');
   }
 
+  const { data: { user } } = await supabase.auth.getUser();
+  const temporaryPassword = readTemporaryPasswordState(user?.app_metadata);
+
+  if (temporaryPassword.expired) {
+    await supabase.auth.signOut();
+    return failure('This temporary password has expired. Ask the platform administrator for a new one.');
+  }
+
   const viewer = await getViewer();
 
   if (!viewer) {
     return failure('Sign-in did not complete. Please try again.');
+  }
+
+  if (viewer.mustChangePassword) {
+    redirect('/set-password?forced=1');
   }
 
   if (!viewer.isSuperAdmin) {
