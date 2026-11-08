@@ -24,6 +24,7 @@ const IDS = {
   authorityA: '00000000-0000-4000-8000-000000000004',
   ownerB: '00000000-0000-4000-8000-000000000005',
   authorityB: '00000000-0000-4000-8000-000000000006',
+  encyclopediaA: '00000000-0000-4000-8000-000000000007',
   schoolA: '10000000-0000-4000-8000-000000000001',
   schoolB: '10000000-0000-4000-8000-000000000002',
   classA: '20000000-0000-4000-8000-000000000001',
@@ -69,6 +70,7 @@ async function seedFixtures(client) {
     [IDS.authorityA, 'authority.a@alpha.test', 'Alpha Authority'],
     [IDS.ownerB, 'owner.b@beta.test', 'Beta Owner'],
     [IDS.authorityB, 'authority.b@beta.test', 'Beta Authority'],
+    [IDS.encyclopediaA, 'encyclopedia.a@alpha.test', 'Alpha Encyclopedia'],
   ];
   for (const [id, email, fullName] of users) {
     await client.query(
@@ -88,8 +90,8 @@ async function seedFixtures(client) {
   await client.query(
     `insert into public.memberships (user_id, institution_id, role) values
        ($1, $2, 'owner'), ($3, $2, 'staff'), ($4, $2, 'authority'),
-       ($5, $6, 'owner'), ($7, $6, 'authority')`,
-    [IDS.ownerA, IDS.schoolA, IDS.staffA, IDS.authorityA, IDS.ownerB, IDS.schoolB, IDS.authorityB],
+       ($5, $6, 'owner'), ($7, $6, 'authority'), ($8, $2, 'school_admin')`,
+    [IDS.ownerA, IDS.schoolA, IDS.staffA, IDS.authorityA, IDS.ownerB, IDS.schoolB, IDS.authorityB, IDS.encyclopediaA],
   );
 
   await client.query(
@@ -262,6 +264,96 @@ test('check-in is removed: officers cannot call the check-in functions', async (
   await expectFailure(c, 'select * from public.list_students_for_check_in($1)', [IDS.schoolA], /permission denied/);
   await expectFailure(c, 'select * from public.record_check_in($1)', [IDS.studentA1], /permission denied/);
   await expectFailure(c, 'select * from public.record_absence($1)', [IDS.studentA1], /permission denied/);
+});
+
+// --- Encyclopedia role (school_admin) --------------------------------------
+
+test('encyclopedia sees the same students, scores, and results as the owner for its school', async (c) => {
+  await asUser(c, IDS.encyclopediaA);
+  assert.equal(await scalar(c, 'select count(*) from public.students'), '2');
+  const adminScores = await scalar(c, 'select count(*) from public.assessment_scores');
+  const adminResults = await scalar(c, 'select count(*) from public.results');
+  await asUser(c, IDS.ownerA);
+  assert.equal(adminScores, await scalar(c, 'select count(*) from public.assessment_scores'));
+  assert.equal(adminResults, await scalar(c, 'select count(*) from public.results'));
+});
+
+test('encyclopedia can add and edit students in its school', async (c) => {
+  await asUser(c, IDS.encyclopediaA);
+  await c.query(
+    `insert into public.students (institution_id, class_id, full_name, admission_number)
+     values ($1, $2, 'Yaw Asare', 'ALP-003')`,
+    [IDS.schoolA, IDS.classA],
+  );
+  const updated = await c.query("update public.students set full_name = 'Yaw A. Asare' where admission_number = 'ALP-003'");
+  assert.equal(updated.rowCount, 1);
+});
+
+test('encyclopedia cannot delete students or scores', async (c) => {
+  await asUser(c, IDS.encyclopediaA);
+  const students = await c.query('delete from public.students where id = $1', [IDS.studentA2]);
+  assert.equal(students.rowCount, 0);
+  const scores = await c.query('delete from public.assessment_scores where student_id = $1', [IDS.studentA1]);
+  assert.equal(scores.rowCount, 0);
+});
+
+test('encyclopedia can enter and edit scores', async (c) => {
+  await asUser(c, IDS.encyclopediaA);
+  await c.query(
+    `insert into public.assessment_scores (institution_id, assessment_id, student_id, score)
+     values ($1, $2, $3, 12)`,
+    [IDS.schoolA, IDS.assessmentA, IDS.studentA2],
+  );
+  const updated = await c.query(
+    'update public.assessment_scores set score = 13 where student_id = $1 and assessment_id = $2',
+    [IDS.studentA2, IDS.assessmentA],
+  );
+  assert.equal(updated.rowCount, 1);
+});
+
+test('encyclopedia cannot change classes, subjects, or terms', async (c) => {
+  await asUser(c, IDS.encyclopediaA);
+  await expectFailure(c, "insert into public.classes (institution_id, name) values ($1, 'Grade 9')", [IDS.schoolA], /row-level security/);
+  await expectFailure(c, "insert into public.subjects (institution_id, name) values ($1, 'Science')", [IDS.schoolA], /row-level security/);
+  await expectFailure(c, "insert into public.terms (institution_id, name, starts_on, ends_on) values ($1, 'Term 9', '2027-01-01', '2027-03-01')", [IDS.schoolA], /row-level security/);
+});
+
+test('encyclopedia cannot compute grades, read grading keys, or read the audit log', async (c) => {
+  await asUser(c, IDS.encyclopediaA);
+  await expectFailure(c, 'select * from public.compute_final_grade($1, $2)', [IDS.termA, IDS.subjectA], /only the school owner/);
+  assert.equal(await scalar(c, 'select count(*) from public.grading_keys'), '0');
+  assert.equal(await scalar(c, 'select count(*) from public.audit_log'), '0');
+});
+
+test('encyclopedia can invite staff only, not owners or other encyclopedia accounts', async (c) => {
+  await asUser(c, IDS.encyclopediaA);
+  await c.query(
+    `insert into public.invitations (institution_id, email, role, invited_by, token_hash)
+     values ($1, 'new.teacher@alpha.test', 'staff', $2, 'hash-staff-1')`,
+    [IDS.schoolA, IDS.encyclopediaA],
+  );
+  await expectFailure(
+    c,
+    `insert into public.invitations (institution_id, email, role, invited_by, token_hash)
+     values ($1, 'new.owner@alpha.test', 'owner', $2, 'hash-owner-1')`,
+    [IDS.schoolA, IDS.encyclopediaA],
+    /row-level security/,
+  );
+  await expectFailure(
+    c,
+    `insert into public.invitations (institution_id, email, role, invited_by, token_hash)
+     values ($1, 'new.admin@alpha.test', 'school_admin', $2, 'hash-admin-1')`,
+    [IDS.schoolA, IDS.encyclopediaA],
+    /row-level security/,
+  );
+});
+
+test('encyclopedia cannot see or change another school\'s data', async (c) => {
+  await asUser(c, IDS.encyclopediaA);
+  const { rows } = await c.query('select institution_id from public.students');
+  assert.ok(rows.every((row) => row.institution_id === IDS.schoolA));
+  const updated = await c.query('update public.students set full_name = \'Changed\' where id = $1', [IDS.studentB1]);
+  assert.equal(updated.rowCount, 0);
 });
 
 // --- Grading ----------------------------------------------------------------
