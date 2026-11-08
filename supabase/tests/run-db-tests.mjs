@@ -95,8 +95,8 @@ async function seedFixtures(client) {
   );
 
   await client.query(
-    `insert into public.classes (id, institution_id, name) values
-       ($1, $2, 'Grade 5'), ($3, $4, 'Grade 5')`,
+    `insert into public.classes (id, institution_id, name, level) values
+       ($1, $2, 'Grade 5', 'primary'), ($3, $4, 'Grade 5', 'primary')`,
     [IDS.classA, IDS.schoolA, IDS.classB, IDS.schoolB],
   );
   await client.query(
@@ -198,7 +198,7 @@ test('owner cannot change another school row', async (c) => {
   assert.equal(rowCount, 0);
   await expectFailure(
     c,
-    `insert into public.classes (institution_id, name) values ($1, 'Intruder')`,
+    `insert into public.classes (institution_id, name, level) values ($1, 'Intruder', 'primary')`,
     [IDS.schoolB],
     /row-level security/,
   );
@@ -682,7 +682,7 @@ test('encyclopedia can enter and edit scores', async (c) => {
 
 test('encyclopedia cannot change classes, subjects, or terms', async (c) => {
   await asUser(c, IDS.encyclopediaA);
-  await expectFailure(c, "insert into public.classes (institution_id, name) values ($1, 'Grade 9')", [IDS.schoolA], /row-level security/);
+  await expectFailure(c, "insert into public.classes (institution_id, name, level) values ($1, 'Grade 9', 'primary')", [IDS.schoolA], /row-level security/);
   await expectFailure(c, "insert into public.subjects (institution_id, name) values ($1, 'Science')", [IDS.schoolA], /row-level security/);
   await expectFailure(c, "insert into public.terms (institution_id, name, starts_on, ends_on) values ($1, 'Term 9', '2027-01-01', '2027-03-01')", [IDS.schoolA], /row-level security/);
 });
@@ -909,7 +909,7 @@ test('impersonation grants read-only access while the session is live', async (c
     [IDS.superAdmin, IDS.ownerA, IDS.schoolA],
   );
   assert.equal(await scalar(c, 'select count(*) from public.students'), '2');
-  await expectFailure(c, `insert into public.classes (institution_id, name) values ($1, 'Injected')`,
+  await expectFailure(c, `insert into public.classes (institution_id, name, level) values ($1, 'Injected', 'primary')`,
     [IDS.schoolA], /row-level security/);
   const { rowCount } = await c.query(`update public.students set full_name = 'Changed' where institution_id = $1`, [IDS.schoolA]);
   assert.equal(rowCount, 0, 'impersonation must not grant write access');
@@ -951,6 +951,161 @@ test('impersonation can target only a school owner', async (c) => {
 // ---------------------------------------------------------------------------
 // Runner
 // ---------------------------------------------------------------------------
+
+// --- Class levels and class-teacher invitations (migration 0016) -------------
+
+test('a new class must have a level', async (c) => {
+  await asUser(c, IDS.ownerA);
+  await expectFailure(
+    c,
+    'insert into public.classes (institution_id, name) values ($1, $2)',
+    [IDS.schoolA, 'Basic 6'],
+    /Choose the class level/,
+  );
+});
+
+test('owner can add a class with a level', async (c) => {
+  await asUser(c, IDS.ownerA);
+  await c.query('insert into public.classes (institution_id, name, level) values ($1, $2, $3)', [IDS.schoolA, 'Basic 6', 'primary']);
+  assert.equal(await scalar(c, "select level from public.classes where name = 'Basic 6'"), 'primary');
+});
+
+test('a class with students cannot change level', async (c) => {
+  await asUser(c, IDS.ownerA);
+  await expectFailure(
+    c,
+    "update public.classes set level = 'jhs' where id = $1",
+    [IDS.classA],
+    /cannot be changed/,
+  );
+});
+
+test('a class with students can be renamed', async (c) => {
+  await asUser(c, IDS.ownerA);
+  await c.query("update public.classes set name = 'Grade 5 Blue' where id = $1", [IDS.classA]);
+  assert.equal(await scalar(c, 'select name from public.classes where id = $1', [IDS.classA]), 'Grade 5 Blue');
+});
+
+test('groups cannot be turned off while a student is in a group', async (c) => {
+  await c.query('update public.classes set has_groups = true where id = $1', [IDS.classA]);
+  const { rows } = await c.query(
+    "insert into public.class_groups (institution_id, class_id, name) values ($1, $2, 'A') returning id",
+    [IDS.schoolA, IDS.classA],
+  );
+  await c.query('update public.students set group_id = $1 where id = $2', [rows[0].id, IDS.studentA1]);
+  await asUser(c, IDS.ownerA);
+  await expectFailure(
+    c,
+    'update public.classes set has_groups = false where id = $1',
+    [IDS.classA],
+    /Move the students out/,
+  );
+});
+
+test('a class with students cannot be deleted', async (c) => {
+  await asUser(c, IDS.ownerA);
+  await expectFailure(c, 'delete from public.classes where id = $1', [IDS.classA], /cannot be deleted/);
+});
+
+test('an empty class can be deleted', async (c) => {
+  await asUser(c, IDS.ownerA);
+  const { rows } = await c.query(
+    "insert into public.classes (institution_id, name, level) values ($1, 'Basic 9', 'jhs') returning id",
+    [IDS.schoolA],
+  );
+  await c.query('delete from public.classes where id = $1', [rows[0].id]);
+  assert.equal(await scalar(c, 'select count(*) from public.classes where id = $1', [rows[0].id]), '0');
+});
+
+test('a class with no level cannot have assessments', async (c) => {
+  // Simulates a class that existed before levels were introduced (no level set yet).
+  await c.query("set local session_replication_role = 'replica'");
+  await c.query("update public.classes set level = null where id = $1", [IDS.classA]);
+  await c.query("set local session_replication_role = 'origin'");
+  await asUser(c, IDS.ownerA);
+  await expectFailure(
+    c,
+    `insert into public.assessments (institution_id, class_id, subject_id, term_id, title, max_score, created_by)
+     values ($1, $2, $3, $4, 'Unlevelled test', 40, $5)`,
+    [IDS.schoolA, IDS.classA, IDS.subjectA, IDS.termA, IDS.ownerA],
+    /Set this class's level/,
+  );
+});
+
+async function minutesUntilExpiry(c, invitationId) {
+  return Number(await scalar(c, 'select extract(epoch from (expires_at - now())) / 60 from public.invitations where id = $1', [invitationId]));
+}
+
+test('a class-teacher invitation expires 30 minutes after it is sent, set by the database', async (c) => {
+  await asUser(c, IDS.ownerA);
+  const { rows } = await c.query(
+    `insert into public.invitations (institution_id, email, role, invited_by, token_hash, class_id, kind, expires_at)
+     values ($1, 'teacher.one@example.test', 'staff', $2, 'hash-class-1', $3, 'class_teacher', now() + interval '7 days') returning id`,
+    [IDS.schoolA, IDS.ownerA, IDS.classA],
+  );
+  const minutes = await minutesUntilExpiry(c, rows[0].id);
+  assert.ok(minutes > 29 && minutes <= 30, `expected about 30 minutes, got ${minutes}`);
+});
+
+test('a Team page staff invitation also expires after 30 minutes', async (c) => {
+  await asUser(c, IDS.ownerA);
+  const { rows } = await c.query(
+    `insert into public.invitations (institution_id, email, role, invited_by, token_hash)
+     values ($1, 'teacher.two@example.test', 'staff', $2, 'hash-staff-1') returning id`,
+    [IDS.schoolA, IDS.ownerA],
+  );
+  const minutes = await minutesUntilExpiry(c, rows[0].id);
+  assert.ok(minutes > 29 && minutes <= 30, `expected about 30 minutes, got ${minutes}`);
+});
+
+test('an authority invitation keeps the 7-day expiry', async (c) => {
+  await asUser(c, IDS.ownerA);
+  const { rows } = await c.query(
+    `insert into public.invitations (institution_id, email, role, invited_by, token_hash)
+     values ($1, 'officer.one@example.test', 'authority', $2, 'hash-authority-1') returning id`,
+    [IDS.schoolA, IDS.ownerA],
+  );
+  const days = Number(await scalar(c, 'select extract(epoch from (expires_at - now())) / 86400 from public.invitations where id = $1', [rows[0].id]));
+  assert.ok(days > 6.9 && days <= 7, `expected about 7 days, got ${days}`);
+});
+
+test('a class can have only one open teacher link', async (c) => {
+  await asUser(c, IDS.ownerA);
+  await c.query(
+    `insert into public.invitations (institution_id, email, role, invited_by, token_hash, class_id, kind)
+     values ($1, 'teacher.three@example.test', 'staff', $2, 'hash-class-2', $3, 'class_teacher')`,
+    [IDS.schoolA, IDS.ownerA, IDS.classA],
+  );
+  await expectFailure(
+    c,
+    `insert into public.invitations (institution_id, email, role, invited_by, token_hash, class_id, kind)
+     values ($1, 'teacher.four@example.test', 'staff', $2, 'hash-class-3', $3, 'class_teacher')`,
+    [IDS.schoolA, IDS.ownerA, IDS.classA],
+    /duplicate key/,
+  );
+});
+
+test('a class-teacher invitation must name a class, and a member invitation cannot', async (c) => {
+  await asUser(c, IDS.ownerA);
+  await expectFailure(
+    c,
+    `insert into public.invitations (institution_id, email, role, invited_by, token_hash, kind)
+     values ($1, 'teacher.five@example.test', 'staff', $2, 'hash-bad-1', 'class_teacher')`,
+    [IDS.schoolA, IDS.ownerA],
+    /invitations_class_teacher_shape/,
+  );
+});
+
+test('assigning a teacher to a class closes its open teacher link', async (c) => {
+  await asUser(c, IDS.ownerA);
+  const { rows } = await c.query(
+    `insert into public.invitations (institution_id, email, role, invited_by, token_hash, class_id, kind)
+     values ($1, 'teacher.six@example.test', 'staff', $2, 'hash-class-4', $3, 'class_teacher') returning id`,
+    [IDS.schoolA, IDS.ownerA, IDS.classA],
+  );
+  await c.query('select public.set_class_teacher_checked($1, $2)', [IDS.classA, IDS.staffA]);
+  assert.notEqual(await scalar(c, 'select revoked_at from public.invitations where id = $1', [rows[0].id]), null);
+});
 
 async function main() {
   const client = new pg.Client({ connectionString: databaseUrl });
