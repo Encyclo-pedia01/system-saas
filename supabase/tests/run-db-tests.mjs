@@ -1,5 +1,5 @@
 // Database test runner: applies migrations to an empty database, then runs the
-// RLS, grading, check-in, insight, audit, and impersonation checks.
+// RLS, grading, insight, audit, and impersonation checks. Check-in was removed in migration 0012.
 //
 // Usage:
 //   npm run db:test                      (local Supabase: supabase start, then db reset)
@@ -246,7 +246,7 @@ test('authority cannot read students, insights, or results', async (c) => {
   assert.equal(await scalar(c, 'select count(*) from public.results'), '0');
 });
 
-test('authority cannot insert check-ins directly, bypassing the server-stamped RPC', async (c) => {
+test('check-in is removed: officers cannot write check-ins directly', async (c) => {
   await asUser(c, IDS.authorityA);
   await expectFailure(
     c,
@@ -257,10 +257,11 @@ test('authority cannot insert check-ins directly, bypassing the server-stamped R
   );
 });
 
-test('authority cannot see another school\'s check-in list', async (c) => {
+test('check-in is removed: officers cannot call the check-in functions', async (c) => {
   await asUser(c, IDS.authorityA);
-  await expectFailure(c, 'select * from public.list_students_for_check_in($1)', [IDS.schoolB],
-    /only authority staff/);
+  await expectFailure(c, 'select * from public.list_students_for_check_in($1)', [IDS.schoolA], /permission denied/);
+  await expectFailure(c, 'select * from public.record_check_in($1)', [IDS.studentA1], /permission denied/);
+  await expectFailure(c, 'select * from public.record_absence($1)', [IDS.studentA1], /permission denied/);
 });
 
 // --- Grading ----------------------------------------------------------------
@@ -350,65 +351,21 @@ test('assessment scores cannot exceed the assessment maximum', async (c) => {
   );
 });
 
-// --- Check-ins ----------------------------------------------------------------
-
-test('check-in is stamped on the server and marked late after the start time', async (c) => {
-  await asUser(c, null);
-  await c.query("update public.institutions set school_start_time = '00:00' where id = $1", [IDS.schoolA]);
-  await asUser(c, IDS.authorityA);
-  const status = await scalar(c, 'select status from public.record_check_in($1)', [IDS.studentA1]);
-  assert.equal(status, 'late');
-});
-
-test('check-in is on-time when the start time has not yet passed', async (c) => {
-  await asUser(c, null);
-  await c.query("update public.institutions set school_start_time = '23:59:59' where id = $1", [IDS.schoolA]);
-  await asUser(c, IDS.authorityA);
-  const status = await scalar(c, 'select status from public.record_check_in($1)', [IDS.studentA2]);
-  assert.equal(status, 'on-time');
-});
-
-test('a second check-in on the same day is rejected', async (c) => {
-  await asUser(c, IDS.authorityA);
-  await c.query('select * from public.record_check_in($1)', [IDS.studentA1]);
-  await expectFailure(c, 'select * from public.record_check_in($1)', [IDS.studentA1], /already has an attendance record/);
-});
-
-test('authority cannot check in a student from another school', async (c) => {
-  await asUser(c, IDS.authorityA);
-  await expectFailure(c, 'select * from public.record_check_in($1)', [IDS.studentB1], /only authority staff|not found/);
-});
-
-test('check-in list returns only names and status for the authority\'s school', async (c) => {
-  await asUser(c, IDS.authorityA);
-  const { rows } = await c.query('select * from public.list_students_for_check_in($1)', [IDS.schoolA]);
-  assert.equal(rows.length, 2);
-  assert.ok(!('admission_number' in rows[0]));
-});
-
 // --- Insights ---------------------------------------------------------------
 
-test('three consecutive absences create a high-severity insight', async (c) => {
+test('absence rows no longer create insights (check-in removed)', async (c) => {
   await asUser(c, null);
   await c.query(
     `insert into public.check_ins (institution_id, student_id, school_date, time_in, status) values
        ($1, $2, current_date - 2, null, 'absent'),
-       ($1, $2, current_date - 1, null, 'absent')`,
+       ($1, $2, current_date - 1, null, 'absent'),
+       ($1, $2, current_date, null, 'absent')`,
     [IDS.schoolA, IDS.studentA2],
   );
-  await asUser(c, IDS.authorityA);
-  await c.query('select * from public.record_absence($1)', [IDS.studentA2]);
-
-  await asUser(c, IDS.ownerA);
-  const insights = await c.query(
-    "select kind, severity from public.insights where student_id = $1 and kind = 'consecutive_absence'",
-    [IDS.studentA2],
+  assert.equal(
+    await scalar(c, "select count(*) from public.insights where student_id = $1 and kind = 'consecutive_absence'", [IDS.studentA2]),
+    '0',
   );
-  assert.equal(insights.rows.length, 1);
-  assert.equal(insights.rows[0].severity, 'high');
-
-  await asUser(c, IDS.staffA);
-  assert.equal(await scalar(c, 'select count(*) from public.insights'), '1');
 });
 
 test('closing a term creates missing-result insights for students without grades', async (c) => {
@@ -475,10 +432,6 @@ test('a suspended school\'s members lose access to tenant data', async (c) => {
   const visible = await c.query('select status from public.institutions');
   assert.equal(visible.rows[0].status, 'suspended');
   assert.equal(await scalar(c, 'select count(*) from public.students'), '0');
-  await expectFailure(c, 'select * from public.list_students_for_check_in($1)', [IDS.schoolB], /only authority staff/);
-
-  await asUser(c, IDS.authorityB);
-  await expectFailure(c, 'select * from public.record_check_in($1)', [IDS.studentB1], /only authority staff/);
 });
 
 test('super admin sees no school data without an active impersonation session', async (c) => {
