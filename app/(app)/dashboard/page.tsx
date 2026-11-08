@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 
 import { InsightCard, type InsightView } from '@/components/dashboard/insight-card';
 import { SetupChecklist } from '@/components/dashboard/setup-checklist';
+import { SubscriptionNotice } from '@/components/dashboard/subscription-notice';
 import { GlassCard } from '@/components/ui/glass-card';
 import { requireSchoolViewer } from '@/lib/auth/viewer';
 import { getSetupItems } from '@/lib/dashboard/setup-status';
@@ -58,6 +59,17 @@ export default async function DashboardPage() {
 
   const setupItems = viewer.effectiveRole === 'owner' ? await getSetupItems(supabase, institutionId, viewer.mfaEnrolled) : null;
 
+  const subscription =
+    viewer.effectiveRole === 'owner'
+      ? await Promise.all([
+          supabase.from('institutions').select('subscription_ends_on').eq('id', institutionId).maybeSingle(),
+          supabase.rpc('institution_access_state', { p_institution_id: institutionId }),
+        ]).then(([institution, access]) => ({
+          endsOn: institution.data?.subscription_ends_on ?? null,
+          state: (access.data as string | null) ?? null,
+        }))
+      : null;
+
   const insights = (insightsResult.data ?? []) as InsightView[];
   const checkIns = checkInsToday.data ?? [];
   const late = checkIns.filter((row) => row.status === 'late').length;
@@ -68,6 +80,7 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <PageHeader eyebrow="Overview" title="Dashboard" description={<>{viewer.institution?.name} · {today}</>} />
 
+      {subscription && <SubscriptionNotice state={subscription.state} endsOn={subscription.endsOn} today={today} />}
       {setupItems && <SetupChecklist items={setupItems} />}
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Summary">

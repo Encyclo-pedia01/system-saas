@@ -18,7 +18,7 @@ export default async function AdminPage() {
 
   const { data, error } = await supabase
     .from('institutions')
-    .select('id, name, slug, status, timezone, created_at, invitations(email, accepted_at)')
+    .select('id, name, slug, status, timezone, created_at, plan, subscription_ends_on, licence_reference, invitations(email, accepted_at)')
     .order('created_at', { ascending: false });
 
   const schools = (data ?? []) as unknown as SchoolView[];
