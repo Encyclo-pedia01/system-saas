@@ -444,6 +444,197 @@ test('fee data is hidden from other schools and from staff and authority', async
   }
 });
 
+// --- Report cards -----------------------------------------------------------
+
+const BANDS = JSON.stringify([
+  { letter: 'F', minScore: 0, label: 'Fail' },
+  { letter: 'D', minScore: 40, label: 'Weak' },
+  { letter: 'C', minScore: 50, label: 'Fair' },
+  { letter: 'B', minScore: 60, label: 'Good' },
+  { letter: 'A', minScore: 80, label: 'Excellent' },
+]);
+
+// Results for Alpha Academy class A in term A: Math and English, three students.
+// Ama: Math 80, English 60 (average 70). Kofi: Math 70, English 60 (average 65).
+// Yaw: Math 80, English 50 (average 65). Ties share positions.
+async function seedClassResults(c) {
+  await asUser(c, null);
+  await c.query("select set_config('app.grading_engine', 'on', true)");
+  const english = await c.query(
+    "insert into public.subjects (institution_id, name) values ($1, 'English') returning id",
+    [IDS.schoolA],
+  );
+  const yaw = await c.query(
+    `insert into public.students (institution_id, class_id, full_name, admission_number)
+     values ($1, $2, 'Yaw Asare', 'ALP-003') returning id`,
+    [IDS.schoolA, IDS.classA],
+  );
+  const englishId = english.rows[0].id;
+  const yawId = yaw.rows[0].id;
+  await c.query(
+    `insert into public.results (institution_id, term_id, subject_id, student_id, final_grade) values
+       ($1, $2, $3, $4, 80), ($1, $2, $3, $5, 70), ($1, $2, $3, $6, 80),
+       ($1, $2, $7, $4, 60), ($1, $2, $7, $5, 60), ($1, $2, $7, $6, 50)`,
+    [IDS.schoolA, IDS.termA, IDS.subjectA, IDS.studentA1, IDS.studentA2, yawId, englishId],
+  );
+  return { englishId, yawId };
+}
+
+async function setBands(c) {
+  await asUser(c, IDS.ownerA);
+  await c.query('select public.set_grade_scale($1, $2::jsonb)', [IDS.schoolA, BANDS]);
+}
+
+test('owner sets a grade scale that starts at 0 with unique letters and scores', async (c) => {
+  await asUser(c, IDS.ownerA);
+  const { rows } = await c.query('select public.set_grade_scale($1, $2::jsonb) as n', [IDS.schoolA, BANDS]);
+  assert.equal(Number(rows[0].n), 5);
+  await expectFailure(c, 'select public.set_grade_scale($1, $2::jsonb)', [IDS.schoolA,
+    JSON.stringify([{ letter: 'A', minScore: 10, label: 'High' }])], /must start at 0/);
+  await expectFailure(c, 'select public.set_grade_scale($1, $2::jsonb)', [IDS.schoolA,
+    JSON.stringify([{ letter: 'A', minScore: 0, label: 'One' }, { letter: 'A', minScore: 50, label: 'Two' }])],
+  /used only once/);
+  await expectFailure(c, 'select public.set_grade_scale($1, $2::jsonb)', [IDS.schoolA,
+    JSON.stringify([{ letter: 'A', minScore: 0, label: 'One' }, { letter: 'B', minScore: 0, label: 'Two' }])],
+  /same score/);
+});
+
+test('encyclopedia cannot set the grade scale or assign class teachers', async (c) => {
+  await asUser(c, IDS.encyclopediaA);
+  await expectFailure(c, 'select public.set_grade_scale($1, $2::jsonb)', [IDS.schoolA, BANDS], /Only the school owner/);
+  await expectFailure(c, 'select public.set_class_teacher($1, $2)', [IDS.classA, IDS.staffA], /Only the school owner/);
+});
+
+test('a class teacher is a staff member and writes remarks only for their own class', async (c) => {
+  await asUser(c, IDS.ownerA);
+  await c.query('select public.set_class_teacher($1, $2)', [IDS.classA, IDS.staffA]);
+  await expectFailure(c, 'select public.set_class_teacher($1, $2)', [IDS.classA, IDS.authorityA], /must be a staff member/);
+
+  await asUser(c, IDS.staffA);
+  await c.query(
+    `insert into public.report_remarks (institution_id, term_id, student_id, kind, body, written_by)
+     values ($1, $2, $3, 'class_teacher', 'Works hard in class.', $4)`,
+    [IDS.schoolA, IDS.termA, IDS.studentA1, IDS.staffA],
+  );
+  await expectFailure(c, `insert into public.report_remarks (institution_id, term_id, student_id, kind, body, written_by)
+     values ($1, $2, $3, 'class_teacher', 'Not my class.', $4)`,
+    [IDS.schoolB, IDS.termB, IDS.studentB1, IDS.staffA], /row-level security|violates/);
+  await expectFailure(c, `insert into public.report_remarks (institution_id, term_id, student_id, kind, body, written_by)
+     values ($1, $2, $3, 'headmaster', 'Not headmaster.', $4)`,
+    [IDS.schoolA, IDS.termA, IDS.studentA2, IDS.staffA], /row-level security/);
+});
+
+test('the headmaster remark is written by the owner, or by a tagged headmaster only', async (c) => {
+  await asUser(c, null);
+  const membership = await scalar(c, "select id from public.memberships where user_id = $1", [IDS.staffA]);
+  await asUser(c, IDS.ownerA);
+  await c.query('select public.set_headmaster_tag($1, true)', [membership]);
+  await c.query(
+    `insert into public.report_remarks (institution_id, term_id, student_id, kind, body, written_by)
+     values ($1, $2, $3, 'headmaster', 'Good progress this term.', $4)`,
+    [IDS.schoolA, IDS.termA, IDS.studentA1, IDS.ownerA],
+  );
+  await asUser(c, IDS.staffA);
+  await c.query(
+    `insert into public.report_remarks (institution_id, term_id, student_id, kind, body, written_by)
+     values ($1, $2, $3, 'headmaster', 'Headmaster view.', $4)`,
+    [IDS.schoolA, IDS.termA, IDS.studentA2, IDS.staffA],
+  );
+  await asUser(c, IDS.ownerA);
+  await expectFailure(c, 'select public.set_headmaster_tag($1, true)', [await scalar(c, "select id from public.memberships where user_id = $1", [IDS.authorityA]) ?? '00000000-0000-0000-0000-000000000000'],
+    /Only a teacher|could not be found/);
+});
+
+test('only the owner can list staff with names and emails', async (c) => {
+  await asUser(c, IDS.ownerA);
+  const { rows } = await c.query('select email, role from public.list_school_staff($1)', [IDS.schoolA]);
+  assert.ok(rows.some((r) => r.email === 'staff.a@alpha.test' && r.role === 'staff'));
+  assert.ok(!rows.some((r) => r.role === 'authority'));
+  await asUser(c, IDS.encyclopediaA);
+  await expectFailure(c, 'select * from public.list_school_staff($1)', [IDS.schoolA], /Only the school owner/);
+});
+
+test('remarks are limited to 300 characters', async (c) => {
+  await asUser(c, IDS.ownerA);
+  await expectFailure(c, `insert into public.report_remarks (institution_id, term_id, student_id, kind, body, written_by)
+     values ($1, $2, $3, 'headmaster', $4, $5)`,
+    [IDS.schoolA, IDS.termA, IDS.studentA1, 'x'.repeat(301), IDS.ownerA], /check constraint/);
+});
+
+test('report card position: tied students share a position, and averages rank the class', async (c) => {
+  await setBands(c);
+  await seedClassResults(c);
+  await asUser(c, IDS.ownerA);
+  const { rows } = await c.query('select public.report_card_snapshot($1, $2) as card', [IDS.termA, IDS.studentA1]);
+  const card = rows[0].card;
+  assert.equal(card.subjects.length, 2);
+  const math = card.subjects.find((x) => x.subject === 'Mathematics');
+  assert.equal(math.letter, 'A');
+  assert.equal(math.subjectPosition, 1);
+  assert.equal(math.subjectOutOf, 3);
+  assert.equal(card.average, 70);
+  assert.equal(card.position, 1);
+  assert.equal(card.classSize, 3);
+
+  const kofi = await c.query('select public.report_card_snapshot($1, $2) as card', [IDS.termA, IDS.studentA2]);
+  assert.equal(kofi.rows[0].card.position, 2);
+  assert.equal(kofi.rows[0].card.subjects.find((x) => x.subject === 'Mathematics').subjectPosition, 3);
+});
+
+test('missing grades block generation and are listed by student and subject', async (c) => {
+  await setBands(c);
+  await seedClassResults(c);
+  await asUser(c, IDS.ownerA);
+  assert.equal(await scalar(c, 'select count(*) from public.report_missing_grades($1, $2)', [IDS.classA, IDS.termA]), '0');
+  await c.query(
+    `insert into public.assessments (institution_id, class_id, subject_id, term_id, title, max_score)
+     values ($1, $2, (select id from public.subjects where institution_id = $1 and name = 'English'), $3, 'Essay', 20)`,
+    [IDS.schoolA, IDS.classA, IDS.termA],
+  );
+  await asUser(c, null);
+  await c.query(
+    `delete from public.results where student_id = $1 and subject_id = (select id from public.subjects where institution_id = $2 and name = 'English')`,
+    [IDS.studentA2, IDS.schoolA],
+  );
+  await asUser(c, IDS.ownerA);
+  const { rows } = await c.query('select student_name, subject_name from public.report_missing_grades($1, $2)', [IDS.classA, IDS.termA]);
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].student_name, 'Kofi Boateng');
+  assert.equal(rows[0].subject_name, 'English');
+});
+
+test('a final card is locked: remarks cannot change until it is unlocked', async (c) => {
+  await setBands(c);
+  await seedClassResults(c);
+  await asUser(c, IDS.ownerA);
+  await c.query(
+    `insert into public.report_remarks (institution_id, term_id, student_id, kind, body, written_by)
+     values ($1, $2, $3, 'headmaster', 'Keep it up.', $4)`,
+    [IDS.schoolA, IDS.termA, IDS.studentA1, IDS.ownerA],
+  );
+  const snapshot = await c.query('select public.report_card_snapshot($1, $2) as card', [IDS.termA, IDS.studentA1]);
+  await c.query(
+    'insert into public.report_finals (institution_id, term_id, student_id, snapshot, marked_by) values ($1, $2, $3, $4::jsonb, $5)',
+    [IDS.schoolA, IDS.termA, IDS.studentA1, JSON.stringify(snapshot.rows[0].card), IDS.ownerA],
+  );
+  await expectFailure(c, "update public.report_remarks set body = 'Changed' where student_id = $1", [IDS.studentA1],
+    /This report card is final/);
+  await expectFailure(c, 'select public.set_grade_scale($1, $2::jsonb)', [IDS.schoolA, BANDS], /already final/);
+  const removed = await c.query('delete from public.report_finals where student_id = $1', [IDS.studentA1]);
+  assert.equal(removed.rowCount, 1);
+  const changed = await c.query("update public.report_remarks set body = 'Changed' where student_id = $1", [IDS.studentA1]);
+  assert.equal(changed.rowCount, 1);
+});
+
+test('only the owner can mark a card final', async (c) => {
+  await setBands(c);
+  await seedClassResults(c);
+  await asUser(c, IDS.encyclopediaA);
+  await expectFailure(c,
+    'insert into public.report_finals (institution_id, term_id, student_id, snapshot, marked_by) values ($1, $2, $3, $4::jsonb, $5)',
+    [IDS.schoolA, IDS.termA, IDS.studentA1, '{}', IDS.encyclopediaA], /row-level security/);
+});
+
 // --- Encyclopedia role (school_admin) --------------------------------------
 
 test('encyclopedia sees the same students, scores, and results as the owner for its school', async (c) => {
