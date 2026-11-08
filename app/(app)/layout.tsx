@@ -38,6 +38,7 @@ function navigationFor(viewer: Viewer): NavItem[] {
       return [
         { href: '/dashboard', label: 'Dashboard', icon: icons.dashboard },
         { href: '/students', label: 'Students', icon: icons.dashboard },
+        { href: '/classes', label: 'Classes', icon: icons.dashboard },
         { href: '/scores', label: 'Scores', icon: icons.grading },
         { href: '/fees', label: 'Fees', icon: icons.grading },
         { href: '/grading', label: 'Grading', icon: icons.grading },
@@ -49,6 +50,7 @@ function navigationFor(viewer: Viewer): NavItem[] {
       return [
         { href: '/dashboard', label: 'Dashboard', icon: icons.dashboard },
         { href: '/students', label: 'Students', icon: icons.dashboard },
+        { href: '/classes', label: 'Classes', icon: icons.dashboard },
         { href: '/scores', label: 'Scores', icon: icons.grading },
         { href: '/fees', label: 'Fees', icon: icons.grading },
         { href: '/report-cards', label: 'Report cards', icon: icons.grading },
@@ -58,6 +60,7 @@ function navigationFor(viewer: Viewer): NavItem[] {
       return [
         { href: '/dashboard', label: 'Dashboard', icon: icons.dashboard },
         { href: '/students', label: 'Students', icon: icons.dashboard },
+        { href: '/classes', label: 'Classes', icon: icons.dashboard },
         { href: '/scores', label: 'Scores', icon: icons.grading },
         { href: '/report-cards', label: 'Report cards', icon: icons.grading },
       ];

@@ -18,7 +18,7 @@ export async function acceptInvitationAction(formData: FormData): Promise<void> 
   const admin = createAdminClient();
   const { data: invitation } = await admin
     .from('invitations')
-    .select('id, email, role, institution_id, accepted_at, revoked_at, expires_at, institution:institutions(status)')
+    .select('id, email, role, kind, class_id, institution_id, accepted_at, revoked_at, expires_at, institution:institutions(status)')
     .eq('token_hash', hashInvitationToken(parsed.data))
     .maybeSingle();
 
@@ -45,6 +45,19 @@ export async function acceptInvitationAction(formData: FormData): Promise<void> 
   );
 
   if (membershipError) redirect(`/invite/${parsed.data}`);
+
+  // A class-teacher link also makes this person the teacher of that class.
+  if (invitation.kind === 'class_teacher' && invitation.class_id) {
+    const { error: classTeacherError } = await admin.from('class_teachers').upsert(
+      {
+        institution_id: invitation.institution_id,
+        class_id: invitation.class_id,
+        user_id: user.id,
+      },
+      { onConflict: 'institution_id,class_id' },
+    );
+    if (classTeacherError) redirect(`/invite/${parsed.data}`);
+  }
 
   await admin
     .from('invitations')
