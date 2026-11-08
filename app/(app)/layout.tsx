@@ -10,9 +10,6 @@ const icons = {
   dashboard: (
     <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 3h6v8H3zM11 3h6v5h-6zM11 10h6v7h-6zM3 13h6v4H3z" /></svg>
   ),
-  checkIn: (
-    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16zm3.7 5.3-4.3 4.3-2-2 1-1 1 1 3.3-3.3z" /></svg>
-  ),
   grading: (
     <svg viewBox="0 0 20 20" fill="currentColor"><path d="M4 3h9l3 3v11H4zM7 9h6v1.5H7zm0 3h6V14H7z" /></svg>
   ),
@@ -52,7 +49,7 @@ function navigationFor(viewer: Viewer): NavItem[] {
         { href: '/scores', label: 'Scores', icon: icons.grading },
       ];
     case 'authority':
-      return [{ href: '/check-in', label: 'Check-in', icon: icons.checkIn }];
+      return [];
     default:
       return [];
   }

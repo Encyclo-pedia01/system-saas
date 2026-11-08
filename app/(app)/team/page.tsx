@@ -11,13 +11,12 @@ import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
   title: 'Team',
-  description: 'Invite teachers and check-in officers to your school.',
+  description: 'Invite teachers to your school.',
 };
 
 const roleLabels: Record<string, string> = {
   owner: 'School owner',
   staff: 'Teacher',
-  authority: 'Check-in officer',
 };
 
 export default async function TeamPage() {
@@ -32,7 +31,7 @@ export default async function TeamPage() {
       .from('invitations')
       .select('id, email, role, created_at, expires_at, accepted_at, revoked_at')
       .eq('institution_id', institutionId)
-      .in('role', ['staff', 'authority'])
+      .eq('role', 'staff')
       .is('accepted_at', null)
       .is('revoked_at', null)
       .order('created_at', { ascending: false }),
@@ -43,7 +42,7 @@ export default async function TeamPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader eyebrow="Team" title="Team" description={<>Invite teachers and check-in officers. Each invitation works once and expires after 7 days.</>} />
+      <PageHeader eyebrow="Team" title="Team" description={<>Invite teachers. Each invitation works once and expires after 7 days.</>} />
 
       {canManage && (
         <GlassCard className="p-6 sm:p-8">

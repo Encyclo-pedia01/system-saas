@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 import { readEnv } from '@/lib/env';
 
-const protectedPrefixes = ['/dashboard', '/check-in', '/grading', '/admin', '/set-password', '/mfa', '/students', '/scores', '/team', '/backup'];
+const protectedPrefixes = ['/dashboard', '/grading', '/admin', '/set-password', '/mfa', '/students', '/scores', '/team', '/backup'];
 
 export async function refreshSession(request: NextRequest): Promise<NextResponse> {
   let response = NextResponse.next({ request });

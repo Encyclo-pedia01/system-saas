@@ -16,7 +16,6 @@ export const exportTables = [
   'exam_scores',
   'grading_keys',
   'results',
-  'check_ins',
   'insights',
 ] as const;
 

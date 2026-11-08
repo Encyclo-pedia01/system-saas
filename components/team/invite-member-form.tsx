@@ -37,7 +37,6 @@ export function InviteMemberForm() {
           <select id="inviteRole" name="role" required defaultValue="" className="field-select" aria-invalid={Boolean(errors?.role)}>
             <option value="" disabled>Choose a role</option>
             <option value="staff">Teacher (enters scores)</option>
-            <option value="authority">Check-in officer (records attendance)</option>
           </select>
           <FieldError messages={errors?.role} />
         </div>

@@ -41,7 +41,7 @@ export const createSchoolSchema = z.object({
 
 export const inviteMemberSchema = z.object({
   email: z.email('Enter a valid email address.').trim().toLowerCase(),
-  role: z.enum(['staff', 'authority'], { message: 'Choose a role.' }),
+  role: z.enum(['staff'], { message: 'Choose a role.' }),
 });
 
 export const invitationTokenSchema = z

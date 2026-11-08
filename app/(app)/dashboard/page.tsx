@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
-import { redirect } from 'next/navigation';
 
 import { InsightCard, type InsightView } from '@/components/dashboard/insight-card';
 import { SetupChecklist } from '@/components/dashboard/setup-checklist';
 import { SubscriptionNotice } from '@/components/dashboard/subscription-notice';
 import { GlassCard } from '@/components/ui/glass-card';
+import { EmptyState } from '@/components/ui/empty-state';
 import { requireSchoolViewer } from '@/lib/auth/viewer';
 import { getSetupItems } from '@/lib/dashboard/setup-status';
 import { createClient } from '@/lib/supabase/server';
@@ -33,7 +33,11 @@ export default async function DashboardPage() {
   const viewer = await requireSchoolViewer();
 
   if (viewer.effectiveRole === 'authority') {
-    redirect('/check-in');
+    return (
+      <EmptyState title="Check-in is paused">
+        Check-in is not available right now. Your school owner will let you know when it returns.
+      </EmptyState>
+    );
   }
 
   const supabase = await createClient();
@@ -43,7 +47,7 @@ export default async function DashboardPage() {
   const { data: localDate } = await supabase.rpc('institution_local_date', { p_institution_id: institutionId });
   const today = String(localDate ?? '');
 
-  const [insightsResult, studentCount, resultCount, checkInsToday] = await Promise.all([
+  const [insightsResult, studentCount, resultCount] = await Promise.all([
     supabase
       .from('insights')
       .select('id, kind, severity, title, body, created_at')
@@ -52,9 +56,6 @@ export default async function DashboardPage() {
       .limit(12),
     supabase.from('students').select('id', { count: 'exact', head: true }),
     supabase.from('results').select('id', { count: 'exact', head: true }),
-    viewer.effectiveRole === 'owner'
-      ? supabase.from('check_ins').select('status').eq('school_date', today)
-      : Promise.resolve({ data: [] as Array<{ status: string }> }),
   ]);
 
   const setupItems = viewer.effectiveRole === 'owner' ? await getSetupItems(supabase, institutionId, viewer.mfaEnrolled) : null;
@@ -71,10 +72,6 @@ export default async function DashboardPage() {
       : null;
 
   const insights = (insightsResult.data ?? []) as InsightView[];
-  const checkIns = checkInsToday.data ?? [];
-  const late = checkIns.filter((row) => row.status === 'late').length;
-  const absent = checkIns.filter((row) => row.status === 'absent').length;
-  const onTime = checkIns.filter((row) => row.status === 'on-time').length;
 
   return (
     <div className="space-y-8">
@@ -86,7 +83,6 @@ export default async function DashboardPage() {
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Summary">
         <StatCard label="Students" value={studentCount.count ?? 0} hint="Enrolled across all classes" />
         <StatCard label="Results" value={resultCount.count ?? 0} hint="Final grades on record" />
-        <StatCard label="On time today" value={onTime} hint={viewer.effectiveRole === 'owner' ? `${late} late · ${absent} absent` : 'Owner view only'} />
         <StatCard label="Open insights" value={insights.length} hint="Alerts that need attention" />
       </section>
 

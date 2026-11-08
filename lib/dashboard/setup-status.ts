@@ -33,7 +33,7 @@ export async function getSetupItems(
       .from('memberships')
       .select('id', { count: 'exact', head: true })
       .eq('institution_id', institutionId)
-      .in('role', ['staff', 'authority']),
+      .eq('role', 'staff'),
     supabase.from('grading_keys').select('id', { count: 'exact', head: true }).eq('institution_id', institutionId),
   ]);
 
@@ -42,7 +42,7 @@ export async function getSetupItems(
     { key: 'subjects', label: 'Add subjects', description: 'List the subjects taught in the school.', href: '/students', done: subjects > 0 },
     { key: 'terms', label: 'Add terms', description: 'Set the start and end dates of each term.', href: '/students', done: terms > 0 },
     { key: 'students', label: 'Enrol students', description: 'Add students one by one or upload a file.', href: '/students', done: students > 0 },
-    { key: 'team', label: 'Invite staff and check-in officers', description: 'Teachers enter scores; check-in officers record attendance.', href: '/team', done: (teamMembers.count ?? 0) > 0 },
+    { key: 'team', label: 'Invite teachers', description: 'Teachers enter scores and results.', href: '/team', done: (teamMembers.count ?? 0) > 0 },
     { key: 'grading', label: 'Set grading weights', description: 'Grades cannot be computed until the weights are set.', href: '/grading', done: (gradingKeys.count ?? 0) > 0 },
     { key: 'authenticator', label: 'Turn on sign-in codes', description: 'Owners sign in with a code from an authenticator app.', href: '/mfa/setup', done: mfaEnrolled },
   ];
