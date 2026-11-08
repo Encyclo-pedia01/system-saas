@@ -266,6 +266,184 @@ test('check-in is removed: officers cannot call the check-in functions', async (
   await expectFailure(c, 'select * from public.record_absence($1)', [IDS.studentA1], /permission denied/);
 });
 
+// --- Fee tracking ------------------------------------------------------------
+// Each test runs in its own transaction, so each one creates the data it needs.
+
+async function createTuition(c) {
+  await asUser(c, IDS.ownerA);
+  const { rows } = await c.query(
+    `insert into public.fee_items (institution_id, term_id, class_id, name, amount_pesewas, created_by)
+     values ($1, $2, $3, 'Tuition', 15000, $4) returning id`,
+    [IDS.schoolA, IDS.termA, IDS.classA, IDS.ownerA],
+  );
+  return rows[0].id;
+}
+
+async function recordPayment(c, amount = 5000, studentId = IDS.studentA1) {
+  await asUser(c, IDS.encyclopediaA);
+  const { rows } = await c.query(
+    `insert into public.fee_payments (institution_id, student_id, term_id, amount_pesewas, paid_on, method, recorded_by)
+     values ($1, $2, $3, $4, '2026-11-05', 'cash', $5) returning id`,
+    [IDS.schoolA, studentId, IDS.termA, amount, IDS.encyclopediaA],
+  );
+  return rows[0].id;
+}
+
+async function balanceOf(c, studentId, termId = IDS.termA) {
+  return Number(await scalar(c, 'select balance_pesewas from public.fee_balances where student_id = $1 and term_id = $2', [studentId, termId]));
+}
+
+test('a fee item creates one charge for each student in the class', async (c) => {
+  const feeId = await createTuition(c);
+  assert.equal(await scalar(c, 'select count(*) from public.fee_charges where fee_item_id = $1', [feeId]), '2');
+});
+
+test('encyclopedia can see balances but cannot create fee items', async (c) => {
+  await createTuition(c);
+  await asUser(c, IDS.encyclopediaA);
+  assert.equal(await scalar(c, 'select count(*) from public.fee_balances'), '2');
+  await expectFailure(
+    c,
+    `insert into public.fee_items (institution_id, term_id, class_id, name, amount_pesewas, created_by)
+     values ($1, $2, $3, 'Sneaky', 100, $4)`,
+    [IDS.schoolA, IDS.termA, IDS.classA, IDS.encyclopediaA],
+    /row-level security/,
+  );
+});
+
+test('encyclopedia records a payment and the balance falls', async (c) => {
+  await createTuition(c);
+  await recordPayment(c, 5000);
+  assert.equal(await balanceOf(c, IDS.studentA1), 10000);
+  assert.equal(await balanceOf(c, IDS.studentA2), 15000);
+});
+
+test('encyclopedia cannot reverse a payment', async (c) => {
+  await createTuition(c);
+  const paymentId = await recordPayment(c, 5000);
+  await asUser(c, IDS.encyclopediaA);
+  await expectFailure(
+    c,
+    `insert into public.fee_payments (institution_id, student_id, term_id, amount_pesewas, paid_on, method, note, reverses_id, recorded_by)
+     values ($1, $2, $3, -5000, '2026-11-06', 'cash', 'Keyed in twice', $4, $5)`,
+    [IDS.schoolA, IDS.studentA1, IDS.termA, paymentId, IDS.encyclopediaA],
+    /row-level security/,
+  );
+});
+
+test('owner reverses a payment; the reversal must match and can happen only once', async (c) => {
+  await createTuition(c);
+  const paymentId = await recordPayment(c, 5000);
+  await asUser(c, IDS.ownerA);
+  await expectFailure(
+    c,
+    `insert into public.fee_payments (institution_id, student_id, term_id, amount_pesewas, paid_on, method, note, reverses_id, recorded_by)
+     values ($1, $2, $3, -4000, '2026-11-06', 'cash', 'Keyed in twice', $4, $5)`,
+    [IDS.schoolA, IDS.studentA1, IDS.termA, paymentId, IDS.ownerA],
+    /must equal the original/,
+  );
+  await c.query(
+    `insert into public.fee_payments (institution_id, student_id, term_id, amount_pesewas, paid_on, method, note, reverses_id, recorded_by)
+     values ($1, $2, $3, -5000, '2026-11-06', 'cash', 'Keyed in twice', $4, $5)`,
+    [IDS.schoolA, IDS.studentA1, IDS.termA, paymentId, IDS.ownerA],
+  );
+  assert.equal(await balanceOf(c, IDS.studentA1), 15000);
+  await expectFailure(
+    c,
+    `insert into public.fee_payments (institution_id, student_id, term_id, amount_pesewas, paid_on, method, note, reverses_id, recorded_by)
+     values ($1, $2, $3, -5000, '2026-11-06', 'cash', 'Again', $4, $5)`,
+    [IDS.schoolA, IDS.studentA1, IDS.termA, paymentId, IDS.ownerA],
+    /duplicate key|fee_payments_one_reversal/,
+  );
+});
+
+test('payments cannot be edited or deleted', async (c) => {
+  await createTuition(c);
+  const paymentId = await recordPayment(c, 5000);
+  await asUser(c, IDS.ownerA);
+  await expectFailure(c, 'update public.fee_payments set amount_pesewas = 1 where id = $1', [paymentId],
+    /permission denied|cannot be edited/);
+  await expectFailure(c, 'delete from public.fee_payments where id = $1', [paymentId],
+    /permission denied|cannot be edited/);
+});
+
+test('owner waives a charge once, with a reason; the waived amount leaves the balance', async (c) => {
+  await createTuition(c);
+  await asUser(c, IDS.ownerA);
+  await expectFailure(c, 'update public.fee_charges set waived_at = now() where student_id = $1', [IDS.studentA2],
+    /check constraint/);
+  await expectFailure(c, 'update public.fee_charges set amount_pesewas = 1 where student_id = $1', [IDS.studentA1],
+    /Only a waiver/);
+  const waived = await c.query(
+    `update public.fee_charges set waived_at = now(), waive_reason = 'Scholarship award' where student_id = $1`,
+    [IDS.studentA2],
+  );
+  assert.equal(waived.rowCount, 1);
+  assert.equal(await balanceOf(c, IDS.studentA2), 0);
+  await expectFailure(c, "update public.fee_charges set waive_reason = 'Changed' where student_id = $1", [IDS.studentA2],
+    /already been waived/);
+});
+
+test('encyclopedia cannot waive charges', async (c) => {
+  await createTuition(c);
+  await asUser(c, IDS.encyclopediaA);
+  const result = await c.query(
+    "update public.fee_charges set waived_at = now(), waive_reason = 'Not allowed' where student_id = $1",
+    [IDS.studentA1],
+  );
+  assert.equal(result.rowCount, 0);
+  assert.equal(await balanceOf(c, IDS.studentA1), 15000);
+});
+
+test('fee items cannot be edited, and removal is blocked once the term has payments', async (c) => {
+  const feeId = await createTuition(c);
+  await recordPayment(c, 5000);
+  await asUser(c, IDS.ownerA);
+  await expectFailure(c, 'update public.fee_items set amount_pesewas = 1 where id = $1', [feeId],
+    /permission denied|cannot be edited/);
+  await expectFailure(c, 'delete from public.fee_items where id = $1', [feeId], /locked/);
+});
+
+test('a fee item with no payments can be removed, and its charges go with it', async (c) => {
+  await asUser(c, IDS.ownerB);
+  const { rows } = await c.query(
+    `insert into public.fee_items (institution_id, term_id, class_id, name, amount_pesewas, created_by)
+     values ($1, $2, $3, 'Levy', 3000, $4) returning id`,
+    [IDS.schoolB, IDS.termB, IDS.classB, IDS.ownerB],
+  );
+  assert.equal(await scalar(c, 'select count(*) from public.fee_charges where fee_item_id = $1', [rows[0].id]), '1');
+  const removed = await c.query('delete from public.fee_items where id = $1', [rows[0].id]);
+  assert.equal(removed.rowCount, 1);
+  assert.equal(await scalar(c, 'select count(*) from public.fee_charges where fee_item_id = $1', [rows[0].id]), '0');
+});
+
+test('a student enrolled later is charged for fee items that apply to their class', async (c) => {
+  await createTuition(c);
+  await asUser(c, null);
+  await c.query("update public.terms set ends_on = '2099-12-31' where id = $1", [IDS.termA]);
+  await asUser(c, IDS.encyclopediaA);
+  const { rows } = await c.query(
+    `insert into public.students (institution_id, class_id, full_name, admission_number)
+     values ($1, $2, 'Efua Tetteh', 'ALP-004') returning id`,
+    [IDS.schoolA, IDS.classA],
+  );
+  assert.equal(await scalar(c, 'select count(*) from public.fee_charges where student_id = $1', [rows[0].id]), '1');
+});
+
+test('fee data is hidden from other schools and from staff and authority', async (c) => {
+  await createTuition(c);
+  await asUser(c, IDS.ownerB);
+  assert.equal(await scalar(c, 'select count(*) from public.fee_items where institution_id = $1', [IDS.schoolA]), '0');
+  assert.equal(await scalar(c, 'select count(*) from public.fee_charges where institution_id = $1', [IDS.schoolA]), '0');
+  for (const user of [IDS.staffA, IDS.authorityA]) {
+    await asUser(c, user);
+    assert.equal(await scalar(c, 'select count(*) from public.fee_items'), '0');
+    assert.equal(await scalar(c, 'select count(*) from public.fee_charges'), '0');
+    assert.equal(await scalar(c, 'select count(*) from public.fee_payments'), '0');
+    assert.equal(await scalar(c, 'select count(*) from public.fee_balances'), '0');
+  }
+});
+
 // --- Encyclopedia role (school_admin) --------------------------------------
 
 test('encyclopedia sees the same students, scores, and results as the owner for its school', async (c) => {
