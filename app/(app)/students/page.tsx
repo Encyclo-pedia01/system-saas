@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
-import { ClassForm, ClassGroupsForm, StudentForm, type ClassOption } from '@/components/students/student-forms';
+import { StudentForm, type ClassOption } from '@/components/students/student-forms';
 import { StudentUpload } from '@/components/students/student-upload';
 import { SubjectForm, TermForm } from '@/components/students/setup-forms';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -43,7 +44,7 @@ export default async function StudentsPage() {
 
       {(canStructure || canEnrol) && (
         <div className="grid gap-6 lg:grid-cols-2">
-          {canStructure && <GlassCard className="p-6"><h2 className="mb-4 text-lg font-semibold">Add a class</h2><ClassForm /></GlassCard>}
+          {canStructure && <GlassCard className="p-6"><h2 className="mb-2 text-lg font-semibold">Classes</h2><p className="mb-4 text-sm text-[var(--muted)]">Add and edit classes, their groups, and class teachers on the Classes page.</p><Link href="/classes" className="btn btn-ghost">Go to Classes</Link></GlassCard>}
           {canEnrol && (
             <GlassCard className="p-6"><h2 className="mb-4 text-lg font-semibold">Enrol a student</h2>
               {classes.length === 0 ? <p className="text-sm text-[var(--muted)]">Add a class first.</p> : <StudentForm classes={classes} />}
@@ -77,7 +78,6 @@ export default async function StudentsPage() {
                 <h2 id={`cls-${schoolClass.id}`} className="text-base font-semibold">{schoolClass.name}</h2>
                 <span className="badge bg-[var(--hover)] text-[var(--muted)]">{members.length}</span>
               </div>
-              {canStructure && <ClassGroupsForm classId={schoolClass.id} />}
               <ul className="mt-3 divide-y divide-[var(--border)] text-sm">
                 {members.length === 0 && <li className="py-3 text-sm text-[var(--muted)]">No students enrolled.</li>}
                 {members.map((s) => (
