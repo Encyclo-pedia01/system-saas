@@ -41,7 +41,7 @@ export default async function FeeSetupPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader
+      <PageHeader backHref="/fees"
         eyebrow="Finance"
         title="Fee items"
         description="A fee is charged to every student in the class (or all classes) when it is added. Fees can be removed until a payment is recorded for their term."

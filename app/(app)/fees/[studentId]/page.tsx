@@ -69,7 +69,7 @@ export default async function StudentFeesPage({ params }: { params: Params }) {
 
   return (
     <div className="space-y-8">
-      <PageHeader
+      <PageHeader backHref="/fees"
         eyebrow={classResult.data?.name ?? 'Student'}
         title={student.full_name}
         description={<>Admission {student.admission_number}. Balance {balance > 0 ? `owed: ${formatGhs(balance)}` : balance < 0 ? `credit: ${formatGhs(-balance)}` : 'clear'}.</>}

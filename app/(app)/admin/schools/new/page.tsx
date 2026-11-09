@@ -15,7 +15,7 @@ export default async function NewSchoolPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
-      <PageHeader eyebrow="Platform" title="Create a school" description={<>Creating the school gives you a one-time invitation link for the owner. Send it to the owner privately. Campus Veritas does not email it.</>} />
+      <PageHeader backHref="/admin" eyebrow="Platform" title="Create a school" description={<>Creating the school gives you a one-time invitation link for the owner. Send it to the owner privately. Campus Veritas does not email it.</>} />
       <GlassCard className="p-6 sm:p-8">
         <CreateSchoolForm />
       </GlassCard>

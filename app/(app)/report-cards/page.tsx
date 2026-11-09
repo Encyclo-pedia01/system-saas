@@ -53,7 +53,7 @@ export default async function ReportCardsPage({ searchParams }: { searchParams: 
   if (terms.length === 0 || classes.length === 0 || !term || !schoolClass) {
     return (
       <div className="space-y-8">
-        <PageHeader eyebrow="Records" title="Report cards" description="Terminal report cards for each class." />
+        <PageHeader backHref="/dashboard" eyebrow="Records" title="Report cards" description="Terminal report cards for each class." />
         <EmptyState title={terms.length === 0 ? 'No terms yet' : 'No classes to show'}>
           {terms.length === 0
             ? 'Add a term on the Students page first.'
@@ -94,7 +94,7 @@ export default async function ReportCardsPage({ searchParams }: { searchParams: 
 
   return (
     <div className="space-y-8">
-      <PageHeader
+      <PageHeader backHref="/dashboard"
         eyebrow="Records"
         title="Report cards"
         description={`${schoolClass.name} · ${term.name}`}

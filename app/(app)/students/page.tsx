@@ -40,7 +40,7 @@ export default async function StudentsPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader eyebrow="Records" title="Students" description={<>{students.length} students across {classes.length} classes.</>} />
+      <PageHeader backHref="/dashboard" eyebrow="Records" title="Students" description={<>{students.length} students across {classes.length} classes.</>} />
 
       {(canStructure || canEnrol) && (
         <div className="grid gap-6 lg:grid-cols-2">

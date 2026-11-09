@@ -51,7 +51,7 @@ function ChecklistItems({ items, nextStep }: { items: SetupItem[]; nextStep: Set
           </div>
           {!item.done && (
             <Link href={item.href} className="btn btn-ghost min-h-11 px-4 text-sm">
-              {item.key === 'authenticator' ? 'Set up' : 'Open'}
+              Open
             </Link>
           )}
         </li>

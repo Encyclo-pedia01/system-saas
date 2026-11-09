@@ -15,7 +15,7 @@ export default async function BackupPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader
+      <PageHeader backHref="/dashboard"
         eyebrow="Records"
         title="Backup"
         description={<>Download a complete copy of your school’s records as a file you keep safe.</>}

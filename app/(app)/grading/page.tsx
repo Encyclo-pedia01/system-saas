@@ -26,7 +26,7 @@ export default async function GradingPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader eyebrow="Academics" title="Grading" description={<>Final grades combine continuous assessment and the final exam using the weights below. Teachers enter scores; only the owner can compute results.</>} />
+      <PageHeader backHref="/dashboard" eyebrow="Academics" title="Grading" description={<>Final grades combine continuous assessment and the final exam using the weights below. Teachers enter scores; only the owner can compute results.</>} />
 
       <div className="grid gap-6 xl:grid-cols-2">
         <GlassCard className="p-6 sm:p-8">

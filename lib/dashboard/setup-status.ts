@@ -5,7 +5,7 @@ import type { createClient } from '@/lib/supabase/server';
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
 export type SetupItem = {
-  key: 'classes' | 'subjects' | 'terms' | 'students' | 'team' | 'grading' | 'authenticator';
+  key: 'classes' | 'subjects' | 'terms' | 'students' | 'team' | 'grading';
   label: string;
   description: string;
   href: string;
@@ -17,7 +17,6 @@ export type SetupItem = {
 export async function getSetupItems(
   supabase: SupabaseServerClient,
   institutionId: string,
-  mfaEnrolled: boolean,
 ): Promise<SetupItem[]> {
   const countOf = async (table: 'classes' | 'subjects' | 'terms' | 'students') => {
     const { count } = await supabase.from(table).select('id', { count: 'exact', head: true }).eq('institution_id', institutionId);
@@ -44,6 +43,5 @@ export async function getSetupItems(
     { key: 'students', label: 'Enrol students', description: 'Add students one by one or upload a file.', href: '/students', done: students > 0 },
     { key: 'team', label: 'Invite teachers', description: 'Teachers enter scores and results.', href: '/team', done: (teamMembers.count ?? 0) > 0 },
     { key: 'grading', label: 'Set grading weights', description: 'Grades cannot be computed until the weights are set.', href: '/grading', done: (gradingKeys.count ?? 0) > 0 },
-    { key: 'authenticator', label: 'Turn on sign-in codes', description: 'Owners sign in with a code from an authenticator app.', href: '/mfa/setup', done: mfaEnrolled },
   ];
 }

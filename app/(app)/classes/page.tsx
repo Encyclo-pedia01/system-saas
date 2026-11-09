@@ -81,7 +81,7 @@ export default async function ClassesPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader
+      <PageHeader backHref="/dashboard"
         eyebrow="Records"
         title="Classes"
         description={
@@ -154,7 +154,7 @@ export default async function ClassesPage() {
           </p>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
-              <thead>
+              <thead className="hidden md:table-header-group">
                 <tr className="border-b border-[var(--border)] text-xs uppercase tracking-wide text-[var(--muted)]">
                   <th scope="col" className="py-2 pr-4">Class</th>
                   <th scope="col" className="py-2 pr-4">Level</th>

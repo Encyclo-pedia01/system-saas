@@ -58,7 +58,7 @@ export default async function DashboardPage() {
     supabase.from('results').select('id', { count: 'exact', head: true }),
   ]);
 
-  const setupItems = viewer.effectiveRole === 'owner' ? await getSetupItems(supabase, institutionId, viewer.mfaEnrolled) : null;
+  const setupItems = viewer.effectiveRole === 'owner' ? await getSetupItems(supabase, institutionId) : null;
 
   const subscription =
     viewer.effectiveRole === 'owner'

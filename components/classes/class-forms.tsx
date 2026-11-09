@@ -265,10 +265,10 @@ export function TeacherRow({ classItem, staff }: { classItem: ClassRecord; staff
   const currentLink = linkState?.ok && linkState.data ? linkState.data : null;
 
   return (
-    <tr className="align-top">
-      <td className="py-3 pr-4 font-medium">{classItem.name}</td>
-      <td className="py-3 pr-4 text-sm text-[var(--muted)]">{classItem.level ? levelLabels[classItem.level] : 'Level not set'}</td>
-      <td className="py-3 pr-4 text-sm">
+    <tr className="block py-3 align-top md:table-row md:py-0">
+      <td className="block py-1 pr-0 font-medium md:table-cell md:py-3 md:pr-4">{classItem.name}</td>
+      <td className="block py-1 pr-0 text-sm text-[var(--muted)] md:table-cell md:py-3 md:pr-4">{classItem.level ? levelLabels[classItem.level] : 'Level not set'}</td>
+      <td className="block py-1 pr-0 text-sm md:table-cell md:py-3 md:pr-4">
         {hasTeacher ? (
           <div className="flex flex-wrap items-center gap-2">
             <span>{classItem.teacherLabel}</span>
@@ -285,7 +285,7 @@ export function TeacherRow({ classItem, staff }: { classItem: ClassRecord; staff
         )}
         {assignState && !assignState.ok && <p role="alert" className="mt-1 text-xs text-[var(--danger)]">{assignState.message}</p>}
       </td>
-      <td className="py-3 text-sm">
+      <td className="block py-1 text-sm md:table-cell md:py-3">
         {!hasTeacher && (
           <div className="space-y-2">
             <div className="flex gap-3 text-xs">
@@ -293,7 +293,7 @@ export function TeacherRow({ classItem, staff }: { classItem: ClassRecord; staff
               <button type="button" onClick={() => setMode('invite')} className={mode === 'invite' ? 'font-semibold' : 'text-[var(--muted)]'}>Invite teacher</button>
             </div>
             {mode === 'assign' ? (
-              <form action={assignAction} className="flex gap-2">
+              <form action={assignAction} className="flex flex-col gap-2 sm:flex-row">
                 <input type="hidden" name="classId" value={classItem.id} />
                 <select name="userId" className="field-input text-xs" defaultValue="" aria-label={`Teacher for ${classItem.name}`}>
                   <option value="">Choose a teacher</option>
@@ -304,7 +304,7 @@ export function TeacherRow({ classItem, staff }: { classItem: ClassRecord; staff
                 <SubmitButton variant="ghost" pendingLabel="…">Assign</SubmitButton>
               </form>
             ) : (
-              <form action={linkAction} className="flex gap-2">
+              <form action={linkAction} className="flex flex-col gap-2 sm:flex-row">
                 <input type="hidden" name="classId" value={classItem.id} />
                 <input name="email" type="email" placeholder="teacher@example.com" className="field-input text-xs" aria-label={`Teacher email for ${classItem.name}`} />
                 <SubmitButton variant="ghost" pendingLabel="…">Make link</SubmitButton>

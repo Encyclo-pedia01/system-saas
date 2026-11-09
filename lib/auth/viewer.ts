@@ -156,14 +156,11 @@ export async function requireSchoolViewer(): Promise<Viewer> {
   return viewer;
 }
 
-// Owners must confirm an authenticator code before they can use school pages or make changes.
-// Returns where to send them, or null when they are fine to continue.
+// Authenticator-app sign-in is turned off, so no one is sent to the authenticator pages.
+// Kept as a function so existing callers keep working.
 export function mfaRedirectFor(viewer: Viewer): string | null {
-  if (viewer.isSuperAdmin || viewer.impersonation || viewer.role !== 'owner') {
-    return null;
-  }
-
-  return viewer.assuranceLevel === 'aal2' ? null : viewer.mfaEnrolled ? '/mfa/verify' : '/mfa/setup';
+  void viewer;
+  return null;
 }
 
 export async function requireEffectiveRole(allowed: AppRole[]): Promise<Viewer> {

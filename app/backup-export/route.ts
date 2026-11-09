@@ -9,7 +9,7 @@ export async function GET() {
 
   // Owners of an active school only. Read-only impersonation is refused so a platform admin
   // cannot take a school's data out unnoticed.
-  if (!viewer || viewer.effectiveRole !== 'owner' || viewer.readOnly || !viewer.institution || viewer.assuranceLevel !== 'aal2') {
+  if (!viewer || viewer.effectiveRole !== 'owner' || viewer.readOnly || !viewer.institution) {
     return NextResponse.json({ message: 'Only the school owner can download a backup.' }, { status: 403 });
   }
 

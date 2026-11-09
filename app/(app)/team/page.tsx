@@ -44,7 +44,7 @@ export default async function TeamPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader eyebrow="Team" title="Team" description={<>Invite teachers and authority staff. Each invitation works once. Teacher links expire 30 minutes after they are sent. Authority links expire after 7 days.</>} />
+      <PageHeader backHref="/dashboard" eyebrow="Team" title="Team" description={<>Invite teachers and authority staff. Each invitation works once. Teacher links expire 30 minutes after they are sent. Authority links expire after 7 days.</>} />
 
       {canInvite && (
         <GlassCard className="p-6 sm:p-8">

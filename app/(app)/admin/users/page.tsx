@@ -62,7 +62,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: S
 
   return (
     <div className="space-y-8">
-      <PageHeader
+      <PageHeader backHref="/admin"
         eyebrow="Platform"
         title="Users"
         description="Find an account by email. Set a temporary password when someone is locked out. They must choose their own password at sign-in."

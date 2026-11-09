@@ -45,7 +45,7 @@ export default async function ReportCardSetupPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader
+      <PageHeader backHref="/report-cards"
         eyebrow="Records"
         title="Report card setup"
         description="Set the grade scale, assign class teachers, and tag the headmaster. Report cards cannot be printed until the grade scale is set."

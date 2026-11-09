@@ -70,7 +70,7 @@ export default async function ScoresPage({ searchParams }: { searchParams: Searc
 
   return (
     <div className="space-y-8">
-      <PageHeader eyebrow="Academics" title="Scores" description={<>Teachers enter scores here. Final grades are computed by the owner on the Grading page, and nobody can edit them by hand.</>} />
+      <PageHeader backHref="/dashboard" eyebrow="Academics" title="Scores" description={<>Teachers enter scores here. Final grades are computed by the owner on the Grading page, and nobody can edit them by hand.</>} />
 
       {canEnter && (
         <GlassCard className="p-6 sm:p-8">

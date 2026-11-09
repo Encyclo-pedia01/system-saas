@@ -93,7 +93,7 @@ export default async function FeesPage({ searchParams }: { searchParams: SearchP
 
   return (
     <div className="space-y-8">
-      <PageHeader
+      <PageHeader backHref="/dashboard"
         eyebrow="Finance"
         title="Fees"
         description="See what each student owes. Filter by class or name."
