@@ -45,7 +45,7 @@ export function TypedConfirm({
         ref={dialogRef}
         aria-labelledby={`${inputId}-title`}
         onClose={() => setTyped('')}
-        className="w-[min(92vw,28rem)] rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-0 text-[var(--text)] shadow-2xl backdrop:bg-[var(--overlay)]"
+        className="m-auto w-[min(92vw,28rem)] rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-0 text-[var(--text)] shadow-2xl backdrop:bg-[var(--overlay)]"
       >
         <form action={action} className="flex flex-col gap-4 p-6">
           {Object.entries(hiddenFields).map(([name, value]) => (
