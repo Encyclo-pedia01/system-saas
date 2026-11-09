@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 
 import type { ActionResult } from '@/lib/actions/result';
 import { databaseFailure, failure, fromZodError, success } from '@/lib/actions/result';
@@ -48,4 +49,19 @@ export async function resolveInsightAction(
 
   revalidatePath('/dashboard');
   return success('Insight marked as resolved.');
+}
+
+// Shows or hides the setup guide on this device. Stored in a cookie, so it is per browser.
+export async function setSetupGuideHiddenAction(formData: FormData): Promise<void> {
+  const cookieStore = await cookies();
+  const hidden = formData.get('hidden') === '1';
+
+  cookieStore.set('setup_guide', hidden ? 'hidden' : 'shown', {
+    path: '/',
+    maxAge: 60 * 60 * 24 * 365,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+  });
+
+  revalidatePath('/dashboard');
 }

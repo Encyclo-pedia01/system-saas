@@ -1,10 +1,11 @@
 import Link from 'next/link';
 
+import { SetupGuideToggle } from '@/components/dashboard/setup-guide-toggle';
 import type { SetupItem } from '@/lib/dashboard/setup-status';
 
 // Shows what the owner still has to set up. Once everything is done it collapses to one line,
 // and it can be opened again from there.
-export function SetupChecklist({ items }: { items: SetupItem[] }) {
+export function SetupChecklist({ items, hidden = false }: { items: SetupItem[]; hidden?: boolean }) {
   const remaining = items.filter((item) => !item.done);
   const nextStep = remaining[0]?.key;
 
@@ -19,6 +20,17 @@ export function SetupChecklist({ items }: { items: SetupItem[] }) {
     );
   }
 
+  if (hidden) {
+    return (
+      <section aria-label="Setup guide" className="depth-card p-5">
+        <p className="text-sm font-semibold">
+          Setup guide hidden · {items.length - remaining.length} of {items.length} steps done
+        </p>
+        <SetupGuideToggle hidden />
+      </section>
+    );
+  }
+
   return (
     <section aria-labelledby="setup-heading" className="depth-card p-6">
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
@@ -28,6 +40,7 @@ export function SetupChecklist({ items }: { items: SetupItem[] }) {
         </span>
       </div>
       <ChecklistItems items={items} nextStep={nextStep} />
+      <SetupGuideToggle hidden={false} />
     </section>
   );
 }

@@ -10,6 +10,9 @@ import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export type NavItem = { href: string; label: string; icon: ReactNode };
 
+// Phone bottom bar: the screens used most. Everything else sits under More.
+const PRIMARY_HREFS = ['/dashboard', '/scores', '/classes', '/report-cards'];
+
 type ImpersonationBanner = {
   schoolName: string;
   expiresAt: string;
@@ -83,6 +86,10 @@ export function AppShell({
     .filter((item) => pathname === item.href || pathname.startsWith(`${item.href}/`))
     .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
+  const primaryItems = navItems.filter((item) => PRIMARY_HREFS.includes(item.href));
+  // Platform admins have no main screens, so they keep the Menu button.
+  const useBottomBar = primaryItems.length >= 2;
+
   const navigation = (
     <nav className="flex flex-col gap-1" aria-label="Main">
       {navItems.map((item) => {
@@ -138,16 +145,20 @@ export function AppShell({
       </aside>
 
       <header className="fixed inset-x-0 top-0 z-30 flex items-center justify-between border-b border-[var(--border)] bg-[var(--header-bg)] px-4 py-3 backdrop-blur-md md:hidden">
-        <button
-          type="button"
-          ref={menuButtonRef}
-          onClick={() => setDrawerOpen(true)}
-          className="btn btn-ghost min-h-11 px-3"
-          aria-label="Open navigation"
-          aria-expanded={drawerOpen}
-        >
-          Menu
-        </button>
+        {useBottomBar ? (
+          <span aria-hidden="true" className="size-11" />
+        ) : (
+          <button
+            type="button"
+            ref={menuButtonRef}
+            onClick={() => setDrawerOpen(true)}
+            className="btn btn-ghost min-h-11 px-3"
+            aria-label="Open navigation"
+            aria-expanded={drawerOpen}
+          >
+            Menu
+          </button>
+        )}
         <p className="truncate pl-3 text-sm font-semibold">{schoolName ?? 'Platform'}</p>
       </header>
 
@@ -188,6 +199,46 @@ export function AppShell({
         )}
       </AnimatePresence>
 
+      {useBottomBar && (
+        <nav
+          aria-label="Main"
+          className="fixed inset-x-0 bottom-0 z-30 grid border-t border-[var(--border)] bg-[var(--header-bg)] pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+          style={{ gridTemplateColumns: `repeat(${primaryItems.length + 1}, minmax(0, 1fr))` }}
+        >
+          {primaryItems.map((item) => {
+            const active = item.href === activeHref;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? 'page' : undefined}
+                className={`flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-[0.7rem] font-semibold ${
+                  active ? 'text-[var(--accent)]' : 'text-[var(--muted)]'
+                }`}
+              >
+                <span className={`grid h-7 w-12 place-items-center rounded-full [&_svg]:size-5 ${active ? 'bg-[var(--tone-accent-bg)]' : ''}`} aria-hidden="true">
+                  {item.icon}
+                </span>
+                <span className="truncate">{item.label}</span>
+              </Link>
+            );
+          })}
+          <button
+            type="button"
+            ref={menuButtonRef}
+            onClick={() => setDrawerOpen(true)}
+            aria-expanded={drawerOpen}
+            aria-label="More screens"
+            className="flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-[0.7rem] font-semibold text-[var(--muted)]"
+          >
+            <span className="grid h-7 w-12 place-items-center rounded-full [&_svg]:size-5" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="19" cy="12" r="1.8" /></svg>
+            </span>
+            <span className="truncate">More</span>
+          </button>
+        </nav>
+      )}
+
       <div className="flex min-w-0 flex-1 flex-col">
         {impersonation && (
           <div className="notice mx-4 mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm md:mt-4">
@@ -204,7 +255,7 @@ export function AppShell({
         )}
 
         <motion.main
-          className="flex min-w-0 flex-1 flex-col px-4 pb-16 pt-20 md:px-8 md:pt-8"
+          className={`flex min-w-0 flex-1 flex-col px-4 pt-20 md:px-8 md:pt-8 ${useBottomBar ? "pb-28 md:pb-16" : "pb-16"}`}
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}

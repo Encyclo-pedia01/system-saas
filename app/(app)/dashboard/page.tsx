@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
 
 import { InsightCard, type InsightView } from '@/components/dashboard/insight-card';
 import { SetupChecklist } from '@/components/dashboard/setup-checklist';
@@ -19,12 +20,11 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-function StatCard({ label, value, hint }: { label: string; value: number | string; hint: string }) {
+function StatCard({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="depth-card p-5">
-      <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">{label}</p>
-      <p className="mt-2 text-3xl font-bold tabular-nums">{value}</p>
-      <p className="mt-1 text-xs text-[var(--muted)]">{hint}</p>
+    <div className="depth-card p-4">
+      <p className="text-[0.7rem] font-semibold uppercase tracking-wider text-[var(--muted)]">{label}</p>
+      <p className="mt-1 text-2xl font-bold tabular-nums">{value}</p>
     </div>
   );
 }
@@ -72,38 +72,38 @@ export default async function DashboardPage() {
       : null;
 
   const insights = (insightsResult.data ?? []) as InsightView[];
+  const guideHidden = (await cookies()).get('setup_guide')?.value === 'hidden';
 
   return (
     <div className="space-y-8">
       <PageHeader eyebrow="Overview" title="Dashboard" description={<>{viewer.institution?.name} · {today}</>} />
 
-      {subscription && <SubscriptionNotice state={subscription.state} endsOn={subscription.endsOn} today={today} />}
-      {setupItems && <SetupChecklist items={setupItems} />}
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+        {subscription && <SubscriptionNotice state={subscription.state} endsOn={subscription.endsOn} today={today} />}
+        {setupItems && <SetupChecklist items={setupItems} hidden={guideHidden} />}
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Summary">
-        <StatCard label="Students" value={studentCount.count ?? 0} hint="Enrolled across all classes" />
-        <StatCard label="Results" value={resultCount.count ?? 0} hint="Final grades on record" />
-        <StatCard label="Open insights" value={insights.length} hint="Alerts that need attention" />
-      </section>
+        <section className="grid grid-cols-3 gap-3" aria-label="Summary">
+          <StatCard label="Students" value={studentCount.count ?? 0} />
+          <StatCard label="Results" value={resultCount.count ?? 0} />
+          <StatCard label="Open alerts" value={insights.length} />
+        </section>
 
-      <section aria-labelledby="insights-heading">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 id="insights-heading" className="text-lg font-semibold">Insights</h2>
-          <span className="text-xs text-[var(--muted)]">Generated automatically</span>
-        </div>
-
-        {insights.length === 0 ? (
-          <GlassCard className="p-8 text-center text-sm text-[var(--muted)]">
-            No open insights. Alerts for consecutive absences and missing results will appear here.
-          </GlassCard>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            {insights.map((insight) => (
-              <InsightCard key={insight.id} insight={insight} canResolve={canResolve} />
-            ))}
+        <section aria-labelledby="feed-heading" className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <h2 id="feed-heading" className="text-lg font-semibold">Feed</h2>
+            <span className="text-xs text-[var(--muted)]">Updates generated automatically</span>
           </div>
-        )}
-      </section>
+
+          {insights.length === 0 ? (
+            <GlassCard className="p-8 text-center">
+              <p className="font-semibold">You are all caught up</p>
+              <p className="mt-1 text-sm text-[var(--muted)]">Alerts for consecutive absences and missing results will appear here.</p>
+            </GlassCard>
+          ) : (
+            insights.map((insight) => <InsightCard key={insight.id} insight={insight} canResolve={canResolve} />)
+          )}
+        </section>
+      </div>
     </div>
   );
 }
