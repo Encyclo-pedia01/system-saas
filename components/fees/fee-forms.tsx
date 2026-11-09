@@ -10,6 +10,7 @@ import {
   waiveChargeAction,
 } from '@/app/(app)/fees/actions';
 import { FieldError } from '@/components/ui/field-error';
+import { ConfirmedSubmitForm } from '@/components/ui/confirmed-submit-form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { TypedConfirm } from '@/components/ui/typed-confirm';
 import { useActionToast } from '@/components/ui/use-action-toast';
@@ -162,15 +163,14 @@ export function ReversePaymentForm({ paymentId }: { paymentId: string }) {
   const errors = state?.fieldErrors;
 
   return (
-    <form action={action} className="flex flex-wrap items-start gap-2" noValidate>
+    <ConfirmedSubmitForm action={action} className="flex flex-wrap items-start gap-2" title="Reverse this payment?" description="This will mark the payment as reversed and update the student's fee balance. Enter a reason before continuing." actionLabel="Reverse payment" pendingLabel="Reversing…" variant="ghost">
       <input type="hidden" name="paymentId" value={paymentId} />
       <div>
         <label htmlFor={`reverse-${paymentId}`} className="sr-only">Reason for reversal</label>
         <input id={`reverse-${paymentId}`} name="reason" required placeholder="Reason" className="field-input w-48" aria-invalid={Boolean(errors?.reason)} />
         <FieldError messages={errors?.reason} />
       </div>
-      <SubmitButton variant="ghost" pendingLabel="Reversing…">Reverse</SubmitButton>
-    </form>
+    </ConfirmedSubmitForm>
   );
 }
 
@@ -180,14 +180,13 @@ export function WaiveChargeForm({ chargeId }: { chargeId: string }) {
   const errors = state?.fieldErrors;
 
   return (
-    <form action={action} className="flex flex-wrap items-start gap-2" noValidate>
+    <ConfirmedSubmitForm action={action} className="flex flex-wrap items-start gap-2" title="Waive this charge?" description="This will remove the selected charge from the student's outstanding balance. Enter a reason before continuing." actionLabel="Waive charge" pendingLabel="Waiving…" variant="ghost">
       <input type="hidden" name="chargeId" value={chargeId} />
       <div>
         <label htmlFor={`waive-${chargeId}`} className="sr-only">Reason for waiver</label>
         <input id={`waive-${chargeId}`} name="reason" required placeholder="Reason" className="field-input w-48" aria-invalid={Boolean(errors?.reason)} />
         <FieldError messages={errors?.reason} />
       </div>
-      <SubmitButton variant="ghost" pendingLabel="Waiving…">Waive</SubmitButton>
-    </form>
+    </ConfirmedSubmitForm>
   );
 }

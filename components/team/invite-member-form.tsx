@@ -4,7 +4,7 @@ import { useActionState, useState } from 'react';
 
 import { inviteMemberAction } from '@/app/(app)/team/actions';
 import { FieldError } from '@/components/ui/field-error';
-import { SubmitButton } from '@/components/ui/submit-button';
+import { ConfirmedSubmitForm } from '@/components/ui/confirmed-submit-form';
 import { useActionToast } from '@/components/ui/use-action-toast';
 import type { ActionResult } from '@/lib/actions/result';
 
@@ -26,7 +26,7 @@ export function InviteMemberForm() {
 
   return (
     <div className="space-y-5">
-      <form action={action} className="space-y-4" noValidate>
+      <ConfirmedSubmitForm action={action} className="space-y-4" title="Send this invitation?" description="A one-time teacher invitation link will be created and emailed to the address you entered. The link expires after 30 minutes." actionLabel="Send invitation" pendingLabel="Sending…" variant="ghost">
         <div>
           <label htmlFor="inviteEmail" className="field-label">Work email</label>
           <input id="inviteEmail" name="email" type="email" required className="field-input" aria-invalid={Boolean(errors?.email)} />
@@ -41,8 +41,7 @@ export function InviteMemberForm() {
           <FieldError messages={errors?.role} />
         </div>
         {state && !state.ok && !state.fieldErrors && <p role="alert" className="form-error">{state.message}</p>}
-        <SubmitButton variant="ghost" pendingLabel="Sending…">Send invitation</SubmitButton>
-      </form>
+      </ConfirmedSubmitForm>
 
       {link && (
         <div className="space-y-2 rounded-lg border border-[var(--border)] p-4">

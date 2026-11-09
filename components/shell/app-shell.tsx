@@ -41,6 +41,7 @@ export function AppShell({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const drawerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const signOutDialogRef = useRef<HTMLDialogElement>(null);
 
   // Escape closes the drawer, Tab cycles inside it, and focus returns to the Menu button on close.
   useEffect(() => {
@@ -134,15 +135,14 @@ export function AppShell({
       <div className="mt-3">
         <ThemeToggle />
       </div>
-      <form action={signOutAction} className="mt-3">
-        <SubmitButton variant="ghost" pendingLabel="Signing out…" className="w-full">
-          Sign out
-        </SubmitButton>
-      </form>
+      <button type="button" className="btn btn-ghost mt-3 w-full" onClick={() => signOutDialogRef.current?.showModal()}>
+        Sign out
+      </button>
     </div>
   );
 
   return (
+    <>
     <div className="flex min-h-0 flex-1">
       <aside className="depth-card sticky top-4 m-4 hidden h-[calc(100vh-2rem)] w-64 shrink-0 flex-col gap-6 p-5 md:flex">
         <div>
@@ -274,5 +274,18 @@ export function AppShell({
         </motion.main>
       </div>
     </div>
+    <dialog ref={signOutDialogRef} aria-labelledby="sign-out-title" className="m-auto w-[min(92vw,26rem)] rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-0 text-[var(--text)] shadow-2xl backdrop:bg-[var(--overlay)]">
+      <div className="space-y-4 p-6">
+        <h2 id="sign-out-title" className="text-lg font-bold">Sign out of this session?</h2>
+        <p className="text-sm leading-relaxed text-[var(--muted)]">You will be signed out on this device. Any unsaved work may be lost.</p>
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <button type="button" className="btn btn-ghost" onClick={() => signOutDialogRef.current?.close()}>Stay signed in</button>
+          <form action={signOutAction}>
+            <SubmitButton variant="danger" pendingLabel="Signing out…">Sign out of session</SubmitButton>
+          </form>
+        </div>
+      </div>
+    </dialog>
+    </>
   );
 }

@@ -38,12 +38,12 @@ function navigationFor(viewer: Viewer): NavItem[] {
       ];
     case 'school_admin':
       return [
-        { href: '/dashboard', label: 'Dashboard', icon: 'home' },
+        { href: '/dashboard', label: 'Dashboard', icon: 'home', primary: true },
         { href: '/students', label: 'Students', icon: 'users' },
-        { href: '/classes', label: 'Classes', icon: 'classes' },
-        { href: '/scores', label: 'Scores', icon: 'scores' },
+        { href: '/classes', label: 'Classes', icon: 'classes', primary: true },
+        { href: '/scores', label: 'Scores', icon: 'scores', primary: true },
         { href: '/fees', label: 'Fees', icon: 'fees' },
-        { href: '/report-cards', label: 'Report cards', icon: 'report' },
+        { href: '/report-cards', label: 'Report cards', icon: 'report', primary: true },
         { href: '/team', label: 'Team', icon: 'team' },
       ];
     case 'staff':
@@ -51,9 +51,9 @@ function navigationFor(viewer: Viewer): NavItem[] {
         { href: '/dashboard', label: 'Dashboard', icon: 'home', primary: true },
         { href: '/classes', label: 'Classes', icon: 'classes', primary: true },
         { href: '/scores', label: 'Scores', icon: 'scores', primary: true },
-        { href: '/attendance', label: 'Attendance', icon: 'attendance', primary: true },
+        { href: '/report-cards', label: 'Report cards', icon: 'report', primary: true },
+        { href: '/attendance', label: 'Attendance', icon: 'attendance' },
         { href: '/students', label: 'Students', icon: 'users' },
-        { href: '/report-cards', label: 'Report cards', icon: 'report' },
       ];
     case 'authority':
       return [];
