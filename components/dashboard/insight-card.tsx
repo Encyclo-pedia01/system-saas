@@ -18,9 +18,9 @@ export type InsightView = {
 };
 
 const severityStyles: Record<InsightView['severity'], { badge: string; accent: string; label: string }> = {
-  high: { badge: 'tone-danger', accent: 'from-[var(--danger)]', label: 'High' },
-  medium: { badge: 'tone-warning', accent: 'from-[var(--warning)]', label: 'Medium' },
-  low: { badge: 'tone-success', accent: 'from-[var(--success)]', label: 'Low' },
+  high: { badge: 'tone-danger', accent: 'bg-[var(--danger)]', label: 'High' },
+  medium: { badge: 'tone-warning', accent: 'bg-[var(--warning)]', label: 'Medium' },
+  low: { badge: 'tone-success', accent: 'bg-[var(--success)]', label: 'Low' },
 };
 
 export function InsightCard({ insight, canResolve }: { insight: InsightView; canResolve: boolean }) {
@@ -37,7 +37,7 @@ export function InsightCard({ insight, canResolve }: { insight: InsightView; can
       exit={{ opacity: 0, scale: 0.97 }}
       className="depth-card relative overflow-hidden p-5"
     >
-      <span className={`absolute inset-y-0 left-0 w-1 bg-gradient-to-b ${style.accent} to-transparent`} aria-hidden="true" />
+      <span className={`absolute inset-y-0 left-0 w-1 ${style.accent}`} aria-hidden="true" />
       <div className="flex items-start justify-between gap-3 pl-2">
         <div>
           <span className={`badge ${style.badge}`}>{style.label} severity</span>

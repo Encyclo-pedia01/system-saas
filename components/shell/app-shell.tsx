@@ -153,7 +153,7 @@ export function AppShell({
         {identityCard}
       </aside>
 
-      <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center justify-between border-b border-[var(--border)] bg-[var(--header-bg)] px-4 backdrop-blur-md md:hidden">
+      <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center justify-between border-b border-[var(--border)] bg-[var(--header-bg)] px-4 md:hidden">
         <div className="flex min-w-0 items-center gap-2.5">
           <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-lg bg-[var(--accent)] text-sm font-bold text-[var(--on-accent)]">
             {(schoolName ?? 'P').charAt(0).toUpperCase()}
@@ -190,7 +190,7 @@ export function AppShell({
               aria-modal="true"
               aria-label="Navigation"
               ref={drawerRef}
-              className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col gap-6 rounded-none border-r border-[var(--border)] bg-[var(--surface)] p-5 shadow-2xl md:hidden"
+              className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col gap-6 rounded-none border-r border-[var(--border)] bg-[var(--surface)] p-5 md:hidden"
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
@@ -212,7 +212,7 @@ export function AppShell({
       {useBottomBar && (
         <nav
           aria-label="Main"
-          className="fixed inset-x-0 bottom-0 z-30 grid border-t border-[var(--border)] bg-[var(--header-bg)] pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+          className="fixed inset-x-0 bottom-0 z-30 grid border-t border-[var(--border)] bg-[var(--header-bg)] pb-[env(safe-area-inset-bottom)] md:hidden"
           style={{ gridTemplateColumns: `repeat(${primaryItems.length + 1}, minmax(0, 1fr))` }}
         >
           {primaryItems.map((item) => {
