@@ -115,7 +115,36 @@ export default async function FeesPage({ searchParams }: { searchParams: SearchP
       ) : rows.length === 0 ? (
         <EmptyState title="No students match">Try another class or a different name.</EmptyState>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-[var(--border)]">
+        <>
+        <ul aria-label="Student fee balances" className="space-y-3 md:hidden">
+          {rows.map((row) => (
+            <li key={row.id} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <Link href={`/fees/${row.id}`} className="font-medium underline-offset-4 hover:underline">{row.name}</Link>
+                  <p className="text-xs text-[var(--muted)]">{row.admission} · {row.className}</p>
+                </div>
+                {row.balance > 0 ? (
+                  <span className="badge shrink-0 bg-[var(--highlight)] text-[var(--highlight-text)]">Owes {formatGhs(row.balance)}</span>
+                ) : row.balance < 0 ? (
+                  <span className="badge shrink-0 bg-[var(--hover)] text-[var(--muted)]">Credit {formatGhs(-row.balance)}</span>
+                ) : (
+                  <span className="shrink-0 text-sm text-[var(--muted)]">Clear</span>
+                )}
+              </div>
+              <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                <div><dt className="text-xs text-[var(--muted)]">Charged</dt><dd className="tabular-nums">{formatGhs(row.charged)}</dd></div>
+                <div><dt className="text-xs text-[var(--muted)]">Paid</dt><dd className="tabular-nums">{formatGhs(row.paid)}</dd></div>
+              </dl>
+              {row.terms.length > 0 && (
+                <p className="mt-3 text-xs text-[var(--muted)]">
+                  {row.terms.map((term) => `${term.name}: ${formatGhs(term.balance)}`).join(' · ')}
+                </p>
+              )}
+            </li>
+          ))}
+        </ul>
+        <div className="hidden overflow-x-auto rounded-2xl border border-[var(--border)] md:block">
           <table className="data-table min-w-[640px] text-left">
             <caption className="sr-only">Student fee balances</caption>
             <thead className="bg-[var(--hover)] text-xs uppercase tracking-wide text-[var(--muted)]">
@@ -156,6 +185,7 @@ export default async function FeesPage({ searchParams }: { searchParams: SearchP
             </tbody>
           </table>
         </div>
+        </>
       )}
 
       {canRecord && (
