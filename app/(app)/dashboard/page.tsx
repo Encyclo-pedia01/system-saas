@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 
 import { InsightCard, type InsightView } from '@/components/dashboard/insight-card';
+import { TeacherHome } from '@/components/dashboard/teacher-home';
 import { SetupChecklist } from '@/components/dashboard/setup-checklist';
 import { SubscriptionNotice } from '@/components/dashboard/subscription-notice';
 import { GlassCard } from '@/components/ui/glass-card';
@@ -31,6 +32,16 @@ function StatCard({ label, value }: { label: string; value: number | string }) {
 
 export default async function DashboardPage() {
   const viewer = await requireSchoolViewer();
+
+  if (viewer.effectiveRole === 'staff') {
+    const supabase = await createClient();
+    return (
+      <div className="space-y-8">
+        <PageHeader eyebrow="Your classes" title="Home" description={<>{viewer.institution?.name}</>} />
+        <TeacherHome supabase={supabase} institutionId={viewer.institution!.id} userId={viewer.userId} />
+      </div>
+    );
+  }
 
   if (viewer.effectiveRole === 'authority') {
     return (
