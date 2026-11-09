@@ -110,6 +110,15 @@
   --toast-text: #14213d;
 }
 
+body:has(.login-page) {
+  background: #ffffff;
+}
+
+body:has(.login-page) footer {
+  --muted: #4a5568;
+  --border: #d6dde8;
+}
+
 /* Sign-in page is always light, whatever theme the user picked. */
 .login-page {
   color-scheme: light;
