@@ -14,7 +14,7 @@ export default async function LoginPage({ searchParams }: Props) {
   const { next } = await searchParams;
   const nextValue = Array.isArray(next) ? next[0] : next;
   return (
-    <main className="flex flex-1 items-center justify-center bg-[var(--bg)] px-4 py-12">
+    <main className="login-page flex flex-1 items-center justify-center bg-[var(--bg)] px-4 py-12">
       <div className="w-full max-w-sm">
         <p className="text-sm font-semibold text-[var(--muted)]">Campus Veritas</p>
         <h1 className="mt-1 text-2xl font-bold text-[var(--text)]">Sign in</h1>
