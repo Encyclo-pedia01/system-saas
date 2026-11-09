@@ -21,8 +21,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: dark)', color: '#0e1729' },
-    { media: '(prefers-color-scheme: light)', color: '#f3f6fc' },
+    { media: '(prefers-color-scheme: dark)', color: '#151c19' },
+    { media: '(prefers-color-scheme: light)', color: '#f7f5ed' },
   ],
   colorScheme: 'light dark',
 };
@@ -36,7 +36,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="flex min-h-screen flex-col antialiased">
+      <body className="flex min-h-dvh flex-col antialiased">
         <div className="flex flex-1 flex-col">
           <Suspense fallback={null}>{children}</Suspense>
         </div>
