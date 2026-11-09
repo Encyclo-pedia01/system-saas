@@ -98,7 +98,7 @@ export default async function ReportCardsPage({ searchParams }: { searchParams: 
         eyebrow="Records"
         title="Report cards"
         description={`${schoolClass.name} · ${term.name}`}
-        action={isOwner ? <Link href="/report-cards/setup" className="btn btn-ghost">Setup</Link> : undefined}
+        action={isOwner ? <Link href="/report-cards/setup" className="btn btn-ghost">Setup</Link> : <Link href={`/report-cards/preview?classId=${schoolClass.id}&termId=${term.id}`} className="btn btn-ghost">Preview cards</Link>}
       />
 
       <GlassCard className="p-6">
