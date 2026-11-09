@@ -6,17 +6,6 @@ import { mfaRedirectFor, requireViewer, type Viewer } from '@/lib/auth/viewer';
 import { signOutAction } from '@/app/actions/auth';
 import { stopImpersonationAction } from './admin/actions';
 
-const icons = {
-  dashboard: (
-    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 3h6v8H3zM11 3h6v5h-6zM11 10h6v7h-6zM3 13h6v4H3z" /></svg>
-  ),
-  grading: (
-    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M4 3h9l3 3v11H4zM7 9h6v1.5H7zm0 3h6V14H7z" /></svg>
-  ),
-  platform: (
-    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2 2 6l8 4 8-4zM2 10l8 4 8-4-8 4-8-4zm0 4 8 4 8-4" /></svg>
-  ),
-};
 
 const roleLabels: Record<string, string> = {
   owner: 'School owner',
@@ -28,41 +17,41 @@ const roleLabels: Record<string, string> = {
 function navigationFor(viewer: Viewer): NavItem[] {
   if (viewer.isSuperAdmin && !viewer.impersonation) {
     return [
-      { href: '/admin', label: 'Schools', icon: icons.platform },
-      { href: '/admin/users', label: 'Users', icon: icons.platform },
+      { href: '/admin', label: 'Schools', icon: 'shield' },
+      { href: '/admin/users', label: 'Users', icon: 'shield' },
     ];
   }
 
   switch (viewer.effectiveRole) {
     case 'owner':
       return [
-        { href: '/dashboard', label: 'Dashboard', icon: icons.dashboard },
-        { href: '/students', label: 'Students', icon: icons.dashboard },
-        { href: '/classes', label: 'Classes', icon: icons.dashboard },
-        { href: '/scores', label: 'Scores', icon: icons.grading },
-        { href: '/fees', label: 'Fees', icon: icons.grading },
-        { href: '/grading', label: 'Grading', icon: icons.grading },
-        { href: '/report-cards', label: 'Report cards', icon: icons.grading },
-        { href: '/team', label: 'Team', icon: icons.dashboard },
-        { href: '/backup', label: 'Backup', icon: icons.dashboard },
+        { href: '/dashboard', label: 'Dashboard', icon: 'home' },
+        { href: '/students', label: 'Students', icon: 'users' },
+        { href: '/classes', label: 'Classes', icon: 'classes' },
+        { href: '/scores', label: 'Scores', icon: 'scores' },
+        { href: '/fees', label: 'Fees', icon: 'fees' },
+        { href: '/grading', label: 'Grading', icon: 'sliders' },
+        { href: '/report-cards', label: 'Report cards', icon: 'report' },
+        { href: '/team', label: 'Team', icon: 'team' },
+        { href: '/backup', label: 'Backup', icon: 'backup' },
       ];
     case 'school_admin':
       return [
-        { href: '/dashboard', label: 'Dashboard', icon: icons.dashboard },
-        { href: '/students', label: 'Students', icon: icons.dashboard },
-        { href: '/classes', label: 'Classes', icon: icons.dashboard },
-        { href: '/scores', label: 'Scores', icon: icons.grading },
-        { href: '/fees', label: 'Fees', icon: icons.grading },
-        { href: '/report-cards', label: 'Report cards', icon: icons.grading },
-        { href: '/team', label: 'Team', icon: icons.dashboard },
+        { href: '/dashboard', label: 'Dashboard', icon: 'home' },
+        { href: '/students', label: 'Students', icon: 'users' },
+        { href: '/classes', label: 'Classes', icon: 'classes' },
+        { href: '/scores', label: 'Scores', icon: 'scores' },
+        { href: '/fees', label: 'Fees', icon: 'fees' },
+        { href: '/report-cards', label: 'Report cards', icon: 'report' },
+        { href: '/team', label: 'Team', icon: 'team' },
       ];
     case 'staff':
       return [
-        { href: '/dashboard', label: 'Dashboard', icon: icons.dashboard },
-        { href: '/students', label: 'Students', icon: icons.dashboard },
-        { href: '/classes', label: 'Classes', icon: icons.dashboard },
-        { href: '/scores', label: 'Scores', icon: icons.grading },
-        { href: '/report-cards', label: 'Report cards', icon: icons.grading },
+        { href: '/dashboard', label: 'Dashboard', icon: 'home' },
+        { href: '/students', label: 'Students', icon: 'users' },
+        { href: '/classes', label: 'Classes', icon: 'classes' },
+        { href: '/scores', label: 'Scores', icon: 'scores' },
+        { href: '/report-cards', label: 'Report cards', icon: 'report' },
       ];
     case 'authority':
       return [];
@@ -93,7 +82,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const navItems = navigationFor(viewer);
 
   if (isPlatformView) {
-    navItems.push({ href: '/admin/schools/new', label: 'New school', icon: icons.platform });
+    navItems.push({ href: '/admin/schools/new', label: 'New school', icon: 'plus' });
   }
 
   return (

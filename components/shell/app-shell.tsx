@@ -5,10 +5,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
+import { Icon, type IconName } from '@/components/ui/icons';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
-export type NavItem = { href: string; label: string; icon: ReactNode };
+export type NavItem = { href: string; label: string; icon: IconName };
 
 // Phone bottom bar: the screens used most. Everything else sits under More.
 const PRIMARY_HREFS = ['/dashboard', '/scores', '/classes', '/report-cards'];
@@ -86,6 +87,15 @@ export function AppShell({
     .filter((item) => pathname === item.href || pathname.startsWith(`${item.href}/`))
     .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
+  const initials =
+    (userName || 'User')
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((word) => word.charAt(0))
+      .join('')
+      .toUpperCase() || 'U';
+
   const primaryItems = navItems.filter((item) => PRIMARY_HREFS.includes(item.href));
   // Platform admins have no main screens, so they keep the Menu button.
   const useBottomBar = primaryItems.length >= 2;
@@ -107,7 +117,7 @@ export function AppShell({
                 : 'text-[var(--muted)] hover:translate-x-0.5 hover:bg-[var(--hover)] hover:text-[var(--text)]'
             }`}
           >
-            <span className="grid size-5 place-items-center" aria-hidden="true">{item.icon}</span>
+            <Icon name={item.icon} filled={active} className="size-5" />
             {item.label}
           </Link>
         );
@@ -144,22 +154,23 @@ export function AppShell({
         {identityCard}
       </aside>
 
-      <header className="fixed inset-x-0 top-0 z-30 flex items-center justify-between border-b border-[var(--border)] bg-[var(--header-bg)] px-4 py-3 backdrop-blur-md md:hidden">
-        {useBottomBar ? (
-          <span aria-hidden="true" className="size-11" />
-        ) : (
-          <button
-            type="button"
-            ref={menuButtonRef}
-            onClick={() => setDrawerOpen(true)}
-            className="btn btn-ghost min-h-11 px-3"
-            aria-label="Open navigation"
-            aria-expanded={drawerOpen}
-          >
-            Menu
-          </button>
-        )}
-        <p className="truncate pl-3 text-sm font-semibold">{schoolName ?? 'Platform'}</p>
+      <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center justify-between border-b border-[var(--border)] bg-[var(--header-bg)] px-4 backdrop-blur-md md:hidden">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-lg bg-[var(--accent)] text-sm font-bold text-[var(--on-accent)]">
+            {(schoolName ?? 'P').charAt(0).toUpperCase()}
+          </span>
+          <p className="truncate text-base font-bold tracking-tight">{schoolName ?? 'Platform'}</p>
+        </div>
+        <button
+          type="button"
+          ref={menuButtonRef}
+          onClick={() => setDrawerOpen(true)}
+          aria-expanded={drawerOpen}
+          aria-label="Open account and navigation"
+          className="grid size-9 shrink-0 place-items-center rounded-full bg-[var(--tone-accent-bg)] text-xs font-bold text-[var(--accent)]"
+        >
+          {initials}
+        </button>
       </header>
 
       <AnimatePresence>
@@ -180,7 +191,7 @@ export function AppShell({
               aria-modal="true"
               aria-label="Navigation"
               ref={drawerRef}
-              className="glass fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col gap-6 rounded-none p-5 md:hidden"
+              className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col gap-6 rounded-none border-r border-[var(--border)] bg-[var(--surface)] p-5 shadow-2xl md:hidden"
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
@@ -216,8 +227,8 @@ export function AppShell({
                   active ? 'text-[var(--accent)]' : 'text-[var(--muted)]'
                 }`}
               >
-                <span className={`grid h-7 w-12 place-items-center rounded-full [&_svg]:size-5 ${active ? 'bg-[var(--tone-accent-bg)]' : ''}`} aria-hidden="true">
-                  {item.icon}
+                <span className="grid h-7 w-12 place-items-center rounded-full">
+                  <Icon name={item.icon} filled={active} className="size-6" />
                 </span>
                 <span className="truncate">{item.label}</span>
               </Link>
@@ -231,8 +242,8 @@ export function AppShell({
             aria-label="More screens"
             className="flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-[0.7rem] font-semibold text-[var(--muted)]"
           >
-            <span className="grid h-7 w-12 place-items-center rounded-full [&_svg]:size-5" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="19" cy="12" r="1.8" /></svg>
+            <span className="grid h-7 w-12 place-items-center rounded-full">
+              <Icon name="more" className="size-6" />
             </span>
             <span className="truncate">More</span>
           </button>
