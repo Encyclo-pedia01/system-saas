@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { StudentForm, type ClassOption } from '@/components/students/student-forms';
 import { StudentUpload } from '@/components/students/student-upload';
 import { SubjectForm, TermForm } from '@/components/students/setup-forms';
+import { StudentProfileCard } from '@/components/students/student-profile-card';
 import { SuggestedSubjects } from '@/components/students/suggested-subjects';
 import { EmptyState } from '@/components/ui/empty-state';
 import { GlassCard } from '@/components/ui/glass-card';
@@ -90,15 +91,15 @@ export default async function StudentsPage() {
                 <h2 id={`cls-${schoolClass.id}`} className="text-base font-semibold">{schoolClass.name}</h2>
                 <span className="badge bg-[var(--hover)] text-[var(--muted)]">{members.length}</span>
               </div>
-              <ul className="mt-3 divide-y divide-[var(--border)] text-sm">
-                {members.length === 0 && <li className="py-3 text-sm text-[var(--muted)]">No students enrolled.</li>}
+              <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                {members.length === 0 && <li className="text-sm text-[var(--muted)]">No students enrolled.</li>}
                 {members.map((s) => (
-                  <li key={s.id} className="flex items-center justify-between py-2.5">
-                    <span className="font-medium">{s.full_name}</span>
-                    <span className="text-xs text-[var(--muted)]">
-                      {s.group_id && groupNameById.get(s.group_id) ? `${schoolClass.name} ${groupNameById.get(s.group_id)} · ` : ''}{s.admission_number}
-                    </span>
-                  </li>
+                  <StudentProfileCard
+                    key={s.id}
+                    name={s.full_name}
+                    classLabel={s.group_id && groupNameById.get(s.group_id) ? `${schoolClass.name} ${groupNameById.get(s.group_id)}` : schoolClass.name}
+                    admissionNumber={s.admission_number}
+                  />
                 ))}
               </ul>
             </section>
