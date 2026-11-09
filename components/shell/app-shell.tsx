@@ -96,7 +96,7 @@ export function AppShell({
             onClick={() => setDrawerOpen(false)}
             className={`group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
               active
-                ? 'bg-[var(--accent)] text-[var(--on-accent)] shadow-[0_10px_24px_-12px_rgba(47,107,255,0.9)]'
+                ? 'bg-[var(--accent)] text-[var(--on-accent)] shadow-[0_6px_16px_-8px_rgba(15,107,99,0.6)]'
                 : 'text-[var(--muted)] hover:translate-x-0.5 hover:bg-[var(--hover)] hover:text-[var(--text)]'
             }`}
           >
@@ -130,7 +130,7 @@ export function AppShell({
     <div className="flex min-h-0 flex-1">
       <aside className="depth-card sticky top-4 m-4 hidden h-[calc(100vh-2rem)] w-64 shrink-0 flex-col gap-6 p-5 md:flex">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[var(--accent-soft)]">Campus Veritas</p>
+          <p className="eyebrow">Campus Veritas</p>
           <p className="mt-1 truncate text-lg font-bold">{schoolName ?? 'Platform'}</p>
         </div>
         {navigation}

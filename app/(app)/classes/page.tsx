@@ -153,7 +153,7 @@ export default async function ClassesPage() {
             Each invite link is for one teacher and expires 30 minutes after it is made. Regenerate a link to replace it.
           </p>
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="data-table text-left">
               <thead className="hidden md:table-header-group">
                 <tr className="border-b border-[var(--border)] text-xs uppercase tracking-wide text-[var(--muted)]">
                   <th scope="col" className="py-2 pr-4">Class</th>

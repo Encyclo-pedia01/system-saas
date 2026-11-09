@@ -6,7 +6,7 @@ type Tone = 'accent' | 'warning' | 'danger';
 
 const toneClasses: Record<Tone, string> = {
   accent: 'tone-accent ring-[var(--focus-ring)]',
-  warning: 'tone-warning ring-[rgba(230,160,40,0.35)]',
+  warning: 'tone-warning ring-[rgba(242,178,48,0.35)]',
   danger: 'tone-danger ring-[rgba(220,80,80,0.35)]',
 };
 
@@ -31,7 +31,7 @@ export function StatusCard({
         {icon}
       </div>
       {code && (
-        <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-soft)]">{code}</p>
+        <p className="eyebrow mt-6">{code}</p>
       )}
       <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
       <div className="mt-3 text-sm leading-relaxed text-[var(--muted)]">{children}</div>

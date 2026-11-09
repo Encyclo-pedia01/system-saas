@@ -1,107 +1,113 @@
 @import "tailwindcss";
 
+/*
+ * Warm school theme. Teal for actions and links, amber for highlights, cream paper for
+ * backgrounds. Class names are unchanged from the earlier theme so existing screens keep their
+ * layout. Dark is the fallback; light is used when the system or the saved choice is light.
+ */
+
 :root {
   color-scheme: dark;
-  --bg: #070b1f;
-  --bg-raised: #0d1530;
-  --surface: #111b3d;
-  --panel: rgba(13, 21, 48, 0.72);
-  --panel-solid: rgba(13, 21, 48, 0.92);
-  --header-bg: rgba(7, 11, 31, 0.82);
-  --border: rgba(160, 185, 255, 0.14);
-  --hairline: rgba(255, 255, 255, 0.14);
-  --text: #f4f7ff;
-  --muted: #a6b3d9;
-  --accent: #2a64f0;
-  --accent-soft: #9cc0ff;
-  --on-accent: #ffffff;
-  --danger: #ff7a7a;
-  --success: #4fe3b0;
-  --warning: #ffc66b;
-  /* Amber highlight for calls to action and badges. Navy text on amber is about 10:1. */
-  --highlight: #fbbf24;
-  --highlight-text: #0a0f26;
-  --hover: rgba(255, 255, 255, 0.06);
-  --ghost-bg: rgba(255, 255, 255, 0.05);
-  --ghost-hover: rgba(255, 255, 255, 0.09);
-  --field-bg: rgba(5, 9, 26, 0.7);
-  --field-border: rgba(160, 185, 255, 0.18);
-  --glass-top: rgba(255, 255, 255, 0.1);
-  --glass-bottom: rgba(255, 255, 255, 0.03);
-  --glass-shadow: 0 40px 90px -40px rgba(0, 0, 0, 0.7);
-  --skeleton: rgba(255, 255, 255, 0.06);
+  --bg: #141d1c;
+  --bg-raised: #1a2625;
+  --surface: #1f2e2c;
+  --panel: rgba(31, 46, 44, 0.92);
+  --panel-solid: rgba(31, 46, 44, 0.97);
+  --header-bg: rgba(20, 29, 28, 0.92);
+  --border: rgba(246, 236, 214, 0.12);
+  --hairline: rgba(246, 236, 214, 0.1);
+  --text: #f6f1e4;
+  --muted: #b8c2bb;
+  --accent: #3cb3a2;
+  --accent-soft: #8fd9cc;
+  --on-accent: #06201c;
+  --danger: #ff8a80;
+  --success: #6fdcaa;
+  --warning: #ffd27a;
+  /* Amber highlight for badges and key notices. Dark text on amber is about 10:1. */
+  --highlight: #f2b230;
+  --highlight-text: #2a1d00;
+  --hover: rgba(246, 236, 214, 0.06);
+  --ghost-bg: rgba(246, 236, 214, 0.05);
+  --ghost-hover: rgba(246, 236, 214, 0.1);
+  --field-bg: rgba(10, 16, 15, 0.6);
+  --field-border: rgba(246, 236, 214, 0.18);
+  --glass-top: rgba(246, 236, 214, 0.06);
+  --glass-bottom: rgba(246, 236, 214, 0.02);
+  --glass-shadow: 0 20px 44px -30px rgba(0, 0, 0, 0.6);
+  --skeleton: rgba(246, 236, 214, 0.06);
   --overlay: rgba(0, 0, 0, 0.6);
-  --danger-text: #ffd1d1;
-  --tone-success-bg: rgba(79, 227, 176, 0.15);
-  --tone-success-text: #b5f5dd;
-  --tone-warning-bg: rgba(255, 198, 107, 0.15);
-  --tone-warning-text: #ffe0a6;
-  --tone-danger-bg: rgba(255, 122, 122, 0.15);
-  --tone-danger-text: #ffb3b3;
-  --tone-accent-bg: rgba(47, 107, 255, 0.18);
-  --tone-accent-text: #bcd4ff;
-  --notice-bg: rgba(255, 198, 107, 0.12);
-  --notice-border: rgba(255, 198, 107, 0.45);
-  --scene-base: linear-gradient(180deg, #0a1233, #070b1f);
-  --scene-glow-a: rgba(47, 107, 255, 0.35);
-  --scene-glow-b: rgba(156, 192, 255, 0.22);
-  --scene-grid: rgba(160, 185, 255, 0.07);
-  --body-glow: rgba(47, 107, 255, 0.18);
-  --focus-ring: rgba(47, 107, 255, 0.3);
-  --toast-bg: rgba(13, 21, 48, 0.92);
-  --toast-text: #f4f7ff;
+  --danger-text: #ffd1cc;
+  --tone-success-bg: rgba(111, 220, 170, 0.15);
+  --tone-success-text: #bff0d6;
+  --tone-warning-bg: rgba(255, 210, 122, 0.14);
+  --tone-warning-text: #ffe4ad;
+  --tone-danger-bg: rgba(255, 138, 128, 0.14);
+  --tone-danger-text: #ffc4bd;
+  --tone-accent-bg: rgba(60, 179, 162, 0.18);
+  --tone-accent-text: #bdeee6;
+  --notice-bg: rgba(242, 178, 48, 0.12);
+  --notice-border: rgba(242, 178, 48, 0.42);
+  --scene-base: linear-gradient(180deg, #1a2a28, #141d1c);
+  --scene-glow-a: rgba(60, 179, 162, 0.22);
+  --scene-glow-b: rgba(242, 178, 48, 0.14);
+  --scene-grid: rgba(246, 236, 214, 0.05);
+  --body-glow: rgba(242, 178, 48, 0.07);
+  --focus-ring: rgba(60, 179, 162, 0.36);
+  --toast-bg: rgba(31, 46, 44, 0.97);
+  --toast-text: #f6f1e4;
 }
 
-/* Light theme. Chosen with the cookie or the device setting. Text tones are darker for contrast on white. */
+/* Light theme: cream paper, deep teal actions, amber highlights. */
 :root[data-theme='light'] {
   color-scheme: light;
-  --bg: #eef3ff;
-  --bg-raised: #ffffff;
+  --bg: #faf6ee;
+  --bg-raised: #fffdf9;
   --surface: #ffffff;
-  --panel: rgba(255, 255, 255, 0.82);
-  --panel-solid: rgba(255, 255, 255, 0.96);
-  --header-bg: rgba(238, 243, 255, 0.86);
-  --border: rgba(10, 18, 51, 0.12);
-  --hairline: rgba(10, 18, 51, 0.1);
-  --text: #0a1233;
-  --muted: #4b5a80;
-  --accent: #2a64f0;
-  --accent-soft: #1f4fd1;
+  --panel: rgba(255, 253, 249, 0.94);
+  --panel-solid: rgba(255, 253, 249, 0.98);
+  --header-bg: rgba(250, 246, 238, 0.94);
+  --border: rgba(74, 52, 20, 0.14);
+  --hairline: rgba(74, 52, 20, 0.1);
+  --text: #1e2b2a;
+  --muted: #55625f;
+  --accent: #0f6b63;
+  --accent-soft: #0b5550;
   --on-accent: #ffffff;
-  --danger: #b42323;
-  --success: #0a7a57;
+  --danger: #b42318;
+  --success: #0d7a4f;
   --warning: #8a5a00;
-  --highlight: #fbbf24;
-  --highlight-text: #0a0f26;
-  --hover: rgba(10, 18, 51, 0.05);
-  --ghost-bg: rgba(255, 255, 255, 0.9);
-  --ghost-hover: rgba(47, 107, 255, 0.08);
+  --highlight: #f2b230;
+  --highlight-text: #2a1d00;
+  --hover: rgba(30, 43, 42, 0.05);
+  --ghost-bg: #ffffff;
+  --ghost-hover: rgba(15, 107, 99, 0.07);
   --field-bg: #ffffff;
-  --field-border: rgba(10, 18, 51, 0.2);
-  --glass-top: rgba(255, 255, 255, 0.92);
-  --glass-bottom: rgba(255, 255, 255, 0.72);
-  --glass-shadow: 0 30px 70px -36px rgba(20, 40, 110, 0.35);
-  --skeleton: rgba(10, 18, 51, 0.06);
-  --overlay: rgba(10, 18, 51, 0.35);
+  --field-border: rgba(74, 52, 20, 0.22);
+  --glass-top: rgba(255, 253, 249, 0.96);
+  --glass-bottom: rgba(255, 253, 249, 0.82);
+  --glass-shadow: 0 18px 40px -30px rgba(60, 40, 10, 0.28);
+  --skeleton: rgba(74, 52, 20, 0.06);
+  --overlay: rgba(30, 43, 42, 0.35);
   --danger-text: #7a1414;
-  --tone-success-bg: rgba(10, 122, 87, 0.12);
-  --tone-success-text: #065c41;
-  --tone-warning-bg: rgba(138, 90, 0, 0.12);
+  --tone-success-bg: rgba(13, 122, 79, 0.12);
+  --tone-success-text: #0a5c3b;
+  --tone-warning-bg: rgba(204, 140, 0, 0.14);
   --tone-warning-text: #6b4500;
-  --tone-danger-bg: rgba(180, 35, 35, 0.1);
-  --tone-danger-text: #8a1c1c;
-  --tone-accent-bg: rgba(47, 107, 255, 0.12);
-  --tone-accent-text: #1a46b8;
-  --notice-bg: rgba(251, 191, 36, 0.14);
-  --notice-border: rgba(180, 120, 0, 0.45);
-  --scene-base: linear-gradient(180deg, #dfe8ff, #eef3ff);
-  --scene-glow-a: rgba(47, 107, 255, 0.22);
-  --scene-glow-b: rgba(156, 192, 255, 0.35);
-  --scene-grid: rgba(47, 107, 255, 0.08);
-  --body-glow: rgba(47, 107, 255, 0.1);
-  --focus-ring: rgba(47, 107, 255, 0.28);
-  --toast-bg: rgba(255, 255, 255, 0.97);
-  --toast-text: #0a1233;
+  --tone-danger-bg: rgba(180, 35, 24, 0.1);
+  --tone-danger-text: #8a1c14;
+  --tone-accent-bg: rgba(15, 107, 99, 0.12);
+  --tone-accent-text: #0b4f49;
+  --notice-bg: rgba(242, 178, 48, 0.16);
+  --notice-border: rgba(176, 118, 0, 0.45);
+  --scene-base: linear-gradient(180deg, #f3ead8, #faf6ee);
+  --scene-glow-a: rgba(15, 107, 99, 0.16);
+  --scene-glow-b: rgba(242, 178, 48, 0.22);
+  --scene-grid: rgba(74, 52, 20, 0.07);
+  --body-glow: rgba(242, 178, 48, 0.12);
+  --focus-ring: rgba(15, 107, 99, 0.28);
+  --toast-bg: #fffdf9;
+  --toast-text: #1e2b2a;
 }
 
 html,
@@ -111,62 +117,64 @@ body {
 
 body {
   background:
-    radial-gradient(1200px 600px at 10% -10%, var(--body-glow), transparent 60%),
-    radial-gradient(900px 500px at 110% 110%, var(--body-glow), transparent 60%),
+    radial-gradient(1000px 500px at 0% -10%, var(--body-glow), transparent 60%),
     var(--bg);
   background-attachment: fixed;
   background-repeat: no-repeat;
   color: var(--text);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+h1,
+h2,
+h3 {
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
 ::selection {
-  background: rgba(47, 107, 255, 0.45);
+  background: rgba(15, 107, 99, 0.3);
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent-soft);
-  outline-offset: 3px;
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
   border-radius: 8px;
 }
 
-/* Glassmorphism: frosted panel with a faint highlight border. */
+/* Panels: solid enough to read on, with a soft edge. Name kept from the earlier theme. */
 .glass {
-  background: linear-gradient(160deg, var(--glass-top), var(--glass-bottom));
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-  border: 1px solid var(--hairline);
-  border-radius: 22px;
-  box-shadow:
-    var(--glass-shadow),
-    inset 0 1px 0 var(--hairline);
+  background: linear-gradient(180deg, var(--glass-top), var(--glass-bottom));
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: var(--glass-shadow);
 }
 
-/* Layered depth for dashboard cards. */
+/* Cards. Hover lifts a little and tints the edge teal. */
 .depth-card {
-  background: linear-gradient(180deg, var(--surface), var(--bg-raised));
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 18px;
-  box-shadow: 0 18px 40px -22px rgba(0, 0, 0, 0.8);
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(30, 43, 42, 0.06), 0 10px 24px -20px rgba(60, 40, 10, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .depth-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(47, 107, 255, 0.45);
-  box-shadow: 0 28px 60px -24px rgba(47, 107, 255, 0.35);
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: 0 14px 30px -20px rgba(15, 107, 99, 0.35);
 }
 
 .surface-panel {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 20px;
-  box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.8);
+  border-radius: 18px;
+  box-shadow: 0 1px 2px rgba(30, 43, 42, 0.05);
 }
 
-/* Tactile buttons: raised face, pressed state on active. */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -176,10 +184,10 @@ body {
   padding: 0.55rem 1.1rem;
   border-radius: 12px;
   font-weight: 600;
-  font-size: 0.9rem;
-  letter-spacing: 0.01em;
+  font-size: 0.95rem;
+  letter-spacing: 0.005em;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
   user-select: none;
 }
 
@@ -188,43 +196,40 @@ body {
   cursor: not-allowed;
 }
 
-.btn:not(:disabled):hover {
-  transform: translateY(-1px);
-}
-
 .btn:not(:disabled):active {
-  transform: translateY(1px) scale(0.99);
+  transform: translateY(1px);
 }
 
 .btn-primary {
   color: var(--on-accent);
-  background: linear-gradient(180deg, #2a64f0, #2459e0);
-  box-shadow:
-    0 12px 26px -10px rgba(47, 107, 255, 0.9),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  background: var(--accent);
+  box-shadow: 0 6px 16px -8px rgba(15, 107, 99, 0.6);
 }
 
 .btn-primary:not(:disabled):hover {
-  box-shadow:
-    0 16px 34px -10px rgba(47, 107, 255, 1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.32);
+  background: var(--accent-soft);
 }
 
 .btn-ghost {
   color: var(--text);
   background: var(--ghost-bg);
   border: 1px solid var(--border);
-  box-shadow: inset 0 1px 0 var(--hairline), 0 8px 18px -12px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 1px 2px rgba(30, 43, 42, 0.06);
 }
 
 .btn-ghost:not(:disabled):hover {
   background: var(--ghost-hover);
+  border-color: var(--accent);
 }
 
 .btn-danger {
   color: #fff;
-  background: linear-gradient(180deg, #ff8f8f, #e25858);
-  box-shadow: 0 12px 24px -12px rgba(226, 88, 88, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  background: #b42318;
+  box-shadow: 0 6px 16px -8px rgba(180, 35, 24, 0.6);
+}
+
+.btn-danger:not(:disabled):hover {
+  background: #97190f;
 }
 
 .field-input,
@@ -236,7 +241,6 @@ body {
   background: var(--field-bg);
   border: 1px solid var(--field-border);
   color: var(--text);
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.12);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   outline: none;
 }
@@ -254,24 +258,24 @@ body {
 .field-label {
   display: block;
   margin-bottom: 0.35rem;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  color: var(--muted);
+  color: var(--text);
 }
 
 .field-error {
   margin-top: 0.35rem;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--danger);
 }
 
 .form-error {
   padding: 0.7rem 0.9rem;
   border-radius: 12px;
-  background: rgba(255, 122, 122, 0.12);
-  border: 1px solid rgba(255, 122, 122, 0.35);
+  background: var(--tone-danger-bg);
+  border: 1px solid var(--tone-danger-text);
   color: var(--danger-text);
-  font-size: 0.875rem;
+  font-size: 0.9rem;
 }
 
 .spinner {
@@ -279,7 +283,7 @@ body {
   height: 1rem;
   border-radius: 999px;
   border: 2px solid rgba(255, 255, 255, 0.35);
-  border-top-color: #fff;
+  border-top-color: currentColor;
   animation: spin 0.8s linear infinite;
 }
 
@@ -308,19 +312,17 @@ body {
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.2rem 0.6rem;
+  padding: 0.2rem 0.65rem;
   border-radius: 999px;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .toast-surface {
   background: var(--toast-bg) !important;
   border: 1px solid var(--border) !important;
   color: var(--toast-text) !important;
-  backdrop-filter: blur(12px);
 }
 
 .tone-success {
@@ -346,6 +348,7 @@ body {
 .notice {
   background: var(--notice-bg);
   border: 1px solid var(--notice-border);
+  border-radius: 14px;
 }
 
 /* Poster fallback for the 3D scene. Motion only when the user allows it. */
@@ -360,7 +363,7 @@ body {
   position: absolute;
   border-radius: 999px;
   filter: blur(40px);
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
 .scene-orb-primary {
@@ -368,7 +371,7 @@ body {
   height: 36vmin;
   left: 8%;
   top: 12%;
-  background: radial-gradient(circle, #2f6bff, transparent 70%);
+  background: radial-gradient(circle, #0f6b63, transparent 70%);
 }
 
 .scene-orb-secondary {
@@ -376,7 +379,7 @@ body {
   height: 30vmin;
   right: 6%;
   bottom: 8%;
-  background: radial-gradient(circle, #9cc0ff, transparent 70%);
+  background: radial-gradient(circle, #f2b230, transparent 70%);
 }
 
 .scene-grid {
@@ -402,5 +405,78 @@ body {
 @keyframes drift {
   to {
     transform: translate(4vmin, -3vmin) scale(1.08);
+  }
+}
+
+/* ---- UI track: shared primitives ---- */
+@layer components {
+
+
+  /* Small label above a page title, for example "RECORDS". */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--highlight);
+  }
+
+  /* Tables: scroll sideways on narrow screens, with soft row hover and tabular numbers. */
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.9rem;
+  }
+
+  .data-table thead th {
+    background: var(--hover);
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .data-table tbody td {
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--hairline);
+    vertical-align: middle;
+  }
+
+  .data-table tbody tr {
+    transition: background-color 0.15s ease;
+  }
+
+  .data-table tbody tr:hover {
+    background: var(--hover);
+  }
+
+  .data-table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .data-table .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
   }
 }

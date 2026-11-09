@@ -44,18 +44,18 @@ function formatDate(iso: string): string {
 }
 
 const css = `
-.print-area { font-family: system-ui, sans-serif; color: #0a0f26; }
-.rc-page { background: #fff; color: #0a0f26; max-width: 780px; margin: 0 auto 28px; padding: 28px; border: 1px solid #d6dbe6; border-radius: 8px; }
+.print-area { font-family: system-ui, sans-serif; color: #1e2b2a; }
+.rc-page { background: #fff; color: #1e2b2a; max-width: 780px; margin: 0 auto 28px; padding: 28px; border: 1px solid #e6dccb; border-radius: 8px; }
 .rc-page h1 { font-size: 20px; margin: 0; }
-.rc-page h2 { font-size: 14px; margin: 18px 0 6px; text-transform: uppercase; letter-spacing: .08em; color: #3a4560; }
+.rc-page h2 { font-size: 14px; margin: 18px 0 6px; text-transform: uppercase; letter-spacing: .08em; color: #55625f; }
 .rc-page table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.rc-page th, .rc-page td { border-bottom: 1px solid #e3e7ef; padding: 6px 8px; text-align: left; }
-.rc-page th { background: #f2f5fb; }
+.rc-page th, .rc-page td { border-bottom: 1px solid #ece4d4; padding: 6px 8px; text-align: left; }
+.rc-page th { background: #faf6ee; }
 .rc-page .num { text-align: right; font-variant-numeric: tabular-nums; }
 .rc-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; font-size: 13px; margin-top: 12px; }
 .rc-sign { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-top: 36px; font-size: 12px; }
-.rc-sign div { border-top: 1px solid #0a0f26; padding-top: 4px; }
-.rc-notice { color: #3a4560; font-size: 14px; }
+.rc-sign div { border-top: 1px solid #1e2b2a; padding-top: 4px; }
+.rc-notice { color: #55625f; font-size: 14px; }
 @media print {
   body * { visibility: hidden !important; }
   .print-area, .print-area * { visibility: visible !important; }
@@ -129,7 +129,7 @@ export default async function PrintReportCardsPage({ searchParams }: { searchPar
             </section>
           ) : (
             <section key={key} className="rc-page" aria-label={`Report card for ${card.studentName}`}>
-              <p style={{ margin: 0, fontSize: 12, color: '#3a4560' }}>{card.school}</p>
+              <p style={{ margin: 0, fontSize: 12, color: '#55625f' }}>{card.school}</p>
               <h1>Terminal report · {card.term}</h1>
               <div className="rc-meta">
                 <div><strong>Student:</strong> {card.studentName}</div>

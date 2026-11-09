@@ -116,7 +116,7 @@ export default async function FeesPage({ searchParams }: { searchParams: SearchP
         <EmptyState title="No students match">Try another class or a different name.</EmptyState>
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-[var(--border)]">
-          <table className="w-full min-w-[640px] text-left text-sm">
+          <table className="data-table min-w-[640px] text-left">
             <caption className="sr-only">Student fee balances</caption>
             <thead className="bg-[var(--hover)] text-xs uppercase tracking-wide text-[var(--muted)]">
               <tr>
