@@ -4,9 +4,12 @@ import Link from 'next/link';
 import { StudentForm, type ClassOption } from '@/components/students/student-forms';
 import { StudentUpload } from '@/components/students/student-upload';
 import { SubjectForm, TermForm } from '@/components/students/setup-forms';
+import { SuggestedSubjects } from '@/components/students/suggested-subjects';
 import { EmptyState } from '@/components/ui/empty-state';
 import { GlassCard } from '@/components/ui/glass-card';
 import { requireEffectiveRole } from '@/lib/auth/viewer';
+import { suggestedSubjects } from '@/lib/subjects/suggested';
+import { classLevels, type ClassLevel } from '@/lib/validation/classes';
 import { createClient } from '@/lib/supabase/server';
 
 import { PageHeader } from '@/components/ui/page-header';
@@ -22,11 +25,19 @@ export default async function StudentsPage() {
   const canStructure = viewer.effectiveRole === 'owner' && !viewer.readOnly;
   const canEnrol = (viewer.effectiveRole === 'owner' || viewer.effectiveRole === 'school_admin') && !viewer.readOnly;
 
-  const [classesResult, groupsResult, studentsResult] = await Promise.all([
+  const [classesResult, groupsResult, studentsResult, subjectsResult] = await Promise.all([
     supabase.from('classes').select('id, name, has_groups').eq('institution_id', institutionId).order('name'),
     supabase.from('class_groups').select('id, class_id, name').eq('institution_id', institutionId).order('name'),
     supabase.from('students').select('id, class_id, group_id, full_name, admission_number').eq('institution_id', institutionId).order('full_name'),
+    supabase.from('subjects').select('name').eq('institution_id', institutionId),
   ]);
+  const existingSubjects = new Set((subjectsResult.data ?? []).map((subject) => subject.name.trim().toLowerCase()));
+  const suggestedGroups = (classLevels as readonly ClassLevel[])
+    .map((level) => ({
+      level,
+      subjects: suggestedSubjects[level].filter((name) => !existingSubjects.has(name.toLowerCase())),
+    }))
+    .filter((group) => group.subjects.length > 0);
 
   const groups = groupsResult.data ?? [];
   const classes: ClassOption[] = (classesResult.data ?? []).map((c) => ({
@@ -63,6 +74,7 @@ export default async function StudentsPage() {
 
       {canStructure && (
         <div className="grid gap-6 lg:grid-cols-2">
+          <GlassCard className="p-6"><h2 className="mb-1 text-lg font-semibold">Suggested subjects</h2><p className="mb-4 text-sm text-[var(--muted)]">Tap a subject to add it. Nothing is added until you tap.</p><SuggestedSubjects groups={suggestedGroups} /></GlassCard>
           <GlassCard className="p-6"><h2 className="mb-4 text-lg font-semibold">Add a subject</h2><SubjectForm /></GlassCard>
           <GlassCard className="p-6"><h2 className="mb-4 text-lg font-semibold">Add a term</h2><TermForm /></GlassCard>
         </div>

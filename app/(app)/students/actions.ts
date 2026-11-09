@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import type { ActionResult } from '@/lib/actions/result';
 import { databaseFailure, failure, fromZodError, success } from '@/lib/actions/result';
+import { isSuggestedSubject } from '@/lib/subjects/suggested';
 import { resolveWriteContext } from '@/lib/auth/write-guard';
 import { createClient } from '@/lib/supabase/server';
 import {
@@ -174,4 +175,34 @@ export async function createTermAction(
   revalidatePath('/scores');
   revalidatePath('/grading');
   return success(`Term “${parsed.data.name}” created.`);
+}
+
+export async function createSuggestedSubjectAction(
+  _previous: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await resolveWriteContext(['owner']);
+  if (!guard.ok) return failure(guard.message);
+
+  const name = String(formData.get('name') ?? '');
+  if (!isSuggestedSubject(name)) return failure('Choose a subject from the suggested list.');
+
+  const supabase = await createClient();
+  const { data: existing, error: lookupError } = await supabase
+    .from('subjects')
+    .select('id')
+    .eq('institution_id', guard.context.institutionId)
+    .ilike('name', name)
+    .limit(1);
+  if (lookupError) return databaseFailure(lookupError, 'Could not check existing subjects.');
+  if (existing && existing.length > 0) return failure(`“${name}” is already on your list.`);
+
+  const { error } = await supabase
+    .from('subjects')
+    .insert({ institution_id: guard.context.institutionId, name });
+  if (error) return databaseFailure(error, 'Could not add the subject.');
+
+  revalidatePath('/students');
+  revalidatePath('/scores');
+  return success(`Subject “${name}” added.`);
 }
