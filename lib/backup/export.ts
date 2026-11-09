@@ -9,6 +9,7 @@ export const exportTables = [
   'classes',
   'class_groups',
   'students',
+  'attendance',
   'subjects',
   'terms',
   'assessments',

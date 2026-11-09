@@ -15,7 +15,8 @@ export type IconName =
   | 'backup'
   | 'shield'
   | 'plus'
-  | 'more';
+  | 'more'
+  | 'attendance';
 
 const shapes: Record<IconName, ReactNode> = {
   home: <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />,
@@ -57,6 +58,12 @@ const shapes: Record<IconName, ReactNode> = {
     <>
       <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
       <path d="M14 3v5h5M9 13h6M9 17h6" />
+    </>
+  ),
+  attendance: (
+    <>
+      <rect x="3.5" y="3.5" width="17" height="17" rx="3" />
+      <path d="m8 12.2 2.8 2.8L16 9.5" />
     </>
   ),
   team: (

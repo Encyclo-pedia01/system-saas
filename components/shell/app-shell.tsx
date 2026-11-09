@@ -9,10 +9,8 @@ import { Icon, type IconName } from '@/components/ui/icons';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
-export type NavItem = { href: string; label: string; icon: IconName };
+export type NavItem = { href: string; label: string; icon: IconName; primary?: boolean };
 
-// Phone bottom bar: the screens used most. Everything else sits under More.
-const PRIMARY_HREFS = ['/dashboard', '/scores', '/classes', '/report-cards'];
 
 type ImpersonationBanner = {
   schoolName: string;
@@ -96,7 +94,8 @@ export function AppShell({
       .join('')
       .toUpperCase() || 'U';
 
-  const primaryItems = navItems.filter((item) => PRIMARY_HREFS.includes(item.href));
+  // Phone bottom bar: the screens each role uses most (marked primary in the layout). Everything else sits under More.
+  const primaryItems = navItems.filter((item) => item.primary);
   // Platform admins have no main screens, so they keep the Menu button.
   const useBottomBar = primaryItems.length >= 2;
 

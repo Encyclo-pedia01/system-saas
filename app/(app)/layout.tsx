@@ -25,13 +25,14 @@ function navigationFor(viewer: Viewer): NavItem[] {
   switch (viewer.effectiveRole) {
     case 'owner':
       return [
-        { href: '/dashboard', label: 'Dashboard', icon: 'home' },
+        { href: '/dashboard', label: 'Dashboard', icon: 'home', primary: true },
         { href: '/students', label: 'Students', icon: 'users' },
-        { href: '/classes', label: 'Classes', icon: 'classes' },
-        { href: '/scores', label: 'Scores', icon: 'scores' },
+        { href: '/classes', label: 'Classes', icon: 'classes', primary: true },
+        { href: '/scores', label: 'Scores', icon: 'scores', primary: true },
+        { href: '/attendance', label: 'Attendance', icon: 'attendance' },
         { href: '/fees', label: 'Fees', icon: 'fees' },
         { href: '/grading', label: 'Grading', icon: 'sliders' },
-        { href: '/report-cards', label: 'Report cards', icon: 'report' },
+        { href: '/report-cards', label: 'Report cards', icon: 'report', primary: true },
         { href: '/team', label: 'Team', icon: 'team' },
         { href: '/backup', label: 'Backup', icon: 'backup' },
       ];
@@ -47,10 +48,11 @@ function navigationFor(viewer: Viewer): NavItem[] {
       ];
     case 'staff':
       return [
-        { href: '/dashboard', label: 'Dashboard', icon: 'home' },
+        { href: '/dashboard', label: 'Dashboard', icon: 'home', primary: true },
+        { href: '/classes', label: 'Classes', icon: 'classes', primary: true },
+        { href: '/scores', label: 'Scores', icon: 'scores', primary: true },
+        { href: '/attendance', label: 'Attendance', icon: 'attendance', primary: true },
         { href: '/students', label: 'Students', icon: 'users' },
-        { href: '/classes', label: 'Classes', icon: 'classes' },
-        { href: '/scores', label: 'Scores', icon: 'scores' },
         { href: '/report-cards', label: 'Report cards', icon: 'report' },
       ];
     case 'authority':
