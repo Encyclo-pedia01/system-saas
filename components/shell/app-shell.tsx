@@ -103,7 +103,7 @@ export function AppShell({
             onClick={() => setDrawerOpen(false)}
             className={`group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
               active
-                ? 'bg-[var(--accent)] text-[var(--on-accent)] shadow-[0_6px_16px_-8px_rgba(15,107,99,0.6)]'
+                ? 'bg-[var(--accent)] text-[var(--on-accent)] shadow-[0_6px_16px_-8px_rgba(30,91,184,0.6)]'
                 : 'text-[var(--muted)] hover:translate-x-0.5 hover:bg-[var(--hover)] hover:text-[var(--text)]'
             }`}
           >

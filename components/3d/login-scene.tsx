@@ -3,9 +3,9 @@
 import { Float, Icosahedron, MeshDistortMaterial, Sphere, TorusKnot } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 
-const ACCENT = '#0F6B63';
+const ACCENT = '#1E5BB8';
 const SOFT_BLUE = '#F2B230';
-const DEEP_NAVY = '#1F3D3A';
+const DEEP_NAVY = '#14306A';
 
 export default function LoginScene() {
   return (

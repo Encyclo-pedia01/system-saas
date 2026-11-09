@@ -81,7 +81,7 @@ export default async function FeeSetupPage() {
                 {canWrite && (locked ? (
                   <p className="text-sm text-[var(--muted)]">Locked: payments recorded for this term</p>
                 ) : (
-                  <RemoveFeeItemForm feeItemId={fee.id} />
+                  <RemoveFeeItemForm feeItemId={fee.id} feeName={fee.name} />
                 ))}
               </li>
             );

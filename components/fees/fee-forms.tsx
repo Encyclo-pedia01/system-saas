@@ -11,6 +11,7 @@ import {
 } from '@/app/(app)/fees/actions';
 import { FieldError } from '@/components/ui/field-error';
 import { SubmitButton } from '@/components/ui/submit-button';
+import { TypedConfirm } from '@/components/ui/typed-confirm';
 import { useActionToast } from '@/components/ui/use-action-toast';
 import type { ActionResult } from '@/lib/actions/result';
 
@@ -74,15 +75,21 @@ export function FeeItemForm({
   );
 }
 
-export function RemoveFeeItemForm({ feeItemId }: { feeItemId: string }) {
+export function RemoveFeeItemForm({ feeItemId, feeName }: { feeItemId: string; feeName: string }) {
   const [state, action] = useActionState<ActionResult | null, FormData>(removeFeeItemAction, null);
   useActionToast(state);
 
   return (
-    <form action={action}>
-      <input type="hidden" name="feeItemId" value={feeItemId} />
-      <SubmitButton variant="ghost" pendingLabel="Removing…">Remove</SubmitButton>
-    </form>
+    <TypedConfirm
+      action={action}
+      hiddenFields={{ feeItemId }}
+      itemName={feeName}
+      triggerLabel="Remove"
+      title={`Remove ${feeName}?`}
+      consequence={<p>Students will no longer be charged this fee. Payments already recorded stay on their accounts.</p>}
+      confirmLabel="Remove fee"
+      pendingLabel="Removing…"
+    />
   );
 }
 

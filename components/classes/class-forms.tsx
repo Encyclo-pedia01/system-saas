@@ -11,6 +11,7 @@ import {
   removeGroupAction,
 } from '@/app/(app)/classes/actions';
 import { FieldError } from '@/components/ui/field-error';
+import { TypedConfirm } from '@/components/ui/typed-confirm';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { useActionToast } from '@/components/ui/use-action-toast';
 import type { ActionResult } from '@/lib/actions/result';
@@ -243,16 +244,18 @@ function DeleteClassForm({ classItem }: { classItem: ClassRecord }) {
   const [state, action] = useActionState<ActionResult | null, FormData>(deleteClassAction, null);
   useActionToast(state);
   return (
-    <form
-      action={action}
-      onSubmit={(event) => {
-        if (!window.confirm(`Delete ${classItem.name}? This cannot be undone.`)) event.preventDefault();
-      }}
-    >
-      <input type="hidden" name="classId" value={classItem.id} />
-      <SubmitButton variant="danger" pendingLabel="Deleting…">Delete class</SubmitButton>
-      <p className="mt-1 text-xs text-[var(--muted)]">Only empty classes can be deleted.</p>
-    </form>
+    <div>
+      <TypedConfirm
+        action={action}
+        hiddenFields={{ classId: classItem.id }}
+        itemName={classItem.name}
+        triggerLabel="Delete class"
+        title={`Delete ${classItem.name}?`}
+        consequence={<p>This cannot be undone. Only empty classes can be deleted, so this class must have no students.</p>}
+        confirmLabel="Delete class"
+        pendingLabel="Deleting…"
+      />
+    </div>
   );
 }
 
