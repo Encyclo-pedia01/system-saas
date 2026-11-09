@@ -1,0 +1,33 @@
+{
+  "routes": [
+    { "path": "/", "title": "Home" },
+    { "path": "/admin", "title": "Admin" },
+    { "path": "/admin/schools/new", "title": "Add school" },
+    { "path": "/admin/users", "title": "Users" },
+    { "path": "/attendance", "title": "Attendance" },
+    { "path": "/backup", "title": "Backup" },
+    { "path": "/classes", "title": "Classes" },
+    { "path": "/dashboard", "title": "Dashboard" },
+    { "path": "/fees", "title": "Fees" },
+    { "path": "/fees/:studentId", "title": "Student fees" },
+    { "path": "/fees/setup", "title": "Fee setup" },
+    { "path": "/forgot-password", "title": "Forgot password" },
+    { "path": "/grading", "title": "Grading" },
+    { "path": "/invite/:token", "title": "Invitation" },
+    { "path": "/login", "title": "Sign in" },
+    { "path": "/mfa/setup", "title": "Set up multi-factor authentication" },
+    { "path": "/mfa/verify", "title": "Verify multi-factor authentication" },
+    { "path": "/no-access", "title": "No access" },
+    { "path": "/privacy", "title": "Privacy" },
+    { "path": "/report-cards", "title": "Report cards" },
+    { "path": "/report-cards/preview", "title": "Report-card preview" },
+    { "path": "/report-cards/print", "title": "Print report cards" },
+    { "path": "/report-cards/setup", "title": "Report-card setup" },
+    { "path": "/scores", "title": "Scores" },
+    { "path": "/set-password", "title": "Set password" },
+    { "path": "/students", "title": "Students" },
+    { "path": "/suspended", "title": "Account suspended" },
+    { "path": "/team", "title": "Team" },
+    { "path": "/terms", "title": "Terms" }
+  ]
+}
