@@ -86,8 +86,8 @@ export default async function ClassesPage() {
         title="Classes"
         description={
           isOwner
-            ? 'Choose a class from its level, say whether it is divided into groups, and assign its teacher.'
-            : `${records.length} classes across the school.`
+            ? `${records.length} classes. Set each level and group structure, then assign or invite its teacher.`
+            : `${records.length} classes across the school. Class levels and groups are managed by the owner.`
         }
       />
 
@@ -100,7 +100,7 @@ export default async function ClassesPage() {
 
       {isOwner && unset.length > 0 && (
         <GlassCard className="p-6">
-          <p className="text-sm">
+          <p className="rounded-xl border border-[var(--tone-warning-text)]/30 bg-[var(--tone-warning-bg)] p-4 text-sm">
             <strong>{unset.length} {unset.length === 1 ? 'class has' : 'classes have'} no level.</strong> Choose each one&apos;s level under Level not set below. Its assessments and scores are blocked until then.
           </p>
         </GlassCard>
@@ -119,12 +119,12 @@ export default async function ClassesPage() {
             </h2>
             <div className="grid gap-4 lg:grid-cols-2">
               {section.items.map((record) => (
-                <GlassCard key={record.id} className="p-5">
-                  <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                    <h3 className="font-semibold">{record.name}</h3>
+                <GlassCard key={record.id} className="p-5 sm:p-6">
+                  <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+                    <div><p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--accent-soft)]">{section.title}</p><h3 className="text-lg font-semibold">{record.name}</h3></div>
                     <div className="flex flex-wrap gap-2 text-xs text-[var(--muted)]">
-                      <span className="badge bg-[var(--hover)]">{record.hasGroups ? `${record.groups.length} groups` : 'One class'}</span>
-                      <span className="badge bg-[var(--hover)]">{record.studentCount} students</span>
+                      <span className="badge bg-[var(--hover)]">{record.hasGroups ? `${record.groups.length} groups` : 'No groups'}</span>
+                      <span className="badge bg-[var(--tone-success-bg)] text-[var(--tone-success-text)]">{record.studentCount} students</span>
                     </div>
                   </div>
                   {record.teacherLabel ? (
@@ -133,8 +133,8 @@ export default async function ClassesPage() {
                     <p className="text-sm text-[var(--muted)]">No class teacher yet.</p>
                   )}
                   {isOwner ? (
-                    <details className="mt-3">
-                      <summary className="cursor-pointer text-sm font-medium">Edit class</summary>
+                    <details className="mt-4 border-t border-[var(--border)] pt-3">
+                      <summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold text-[var(--accent-soft)]">Edit class, groups, or deletion</summary>
                       <div className="mt-4">
                         <EditClassForm classItem={record} />
                       </div>

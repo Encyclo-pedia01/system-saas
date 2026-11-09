@@ -44,13 +44,14 @@ export default async function FeeSetupPage() {
       <PageHeader backHref="/fees"
         eyebrow="Finance"
         title="Fee items"
-        description="A fee is charged to every student in the class (or all classes) when it is added. Fees can be removed until a payment is recorded for their term."
+        description="Adding a fee immediately charges every student in the selected class—or all students when no class is selected. Review the term, scope, and amount carefully; once a payment exists for the term, removal is locked."
         action={<Link href="/fees" className="btn btn-ghost">Back to fees</Link>}
       />
 
       {canWrite && (
         <GlassCard className="p-6 sm:p-8">
-          <h2 className="mb-5 text-lg font-semibold">Add a fee</h2>
+          <h2 className="text-lg font-semibold">Add a fee</h2>
+          <p className="mb-5 mt-1 text-sm text-[var(--muted)]">This action creates student charges immediately. You will review the effect before saving.</p>
           {terms.length === 0 ? (
             <p className="text-sm text-[var(--muted)]">Add a term on the Students page first.</p>
           ) : (

@@ -26,31 +26,31 @@ function navigationFor(viewer: Viewer): NavItem[] {
     case 'owner':
       return [
         { href: '/dashboard', label: 'Dashboard', icon: 'home', primary: true },
-        { href: '/students', label: 'Students', icon: 'users' },
-        { href: '/classes', label: 'Classes', icon: 'classes', primary: true },
         { href: '/scores', label: 'Scores', icon: 'scores', primary: true },
+        { href: '/classes', label: 'Classes', icon: 'classes', primary: true },
+        { href: '/report-cards', label: 'Report cards', icon: 'report', primary: true },
+        { href: '/students', label: 'Students', icon: 'users' },
         { href: '/attendance', label: 'Attendance', icon: 'attendance' },
         { href: '/fees', label: 'Fees', icon: 'fees' },
         { href: '/grading', label: 'Grading', icon: 'sliders' },
-        { href: '/report-cards', label: 'Report cards', icon: 'report', primary: true },
         { href: '/team', label: 'Team', icon: 'team' },
         { href: '/backup', label: 'Backup', icon: 'backup' },
       ];
     case 'school_admin':
       return [
         { href: '/dashboard', label: 'Dashboard', icon: 'home', primary: true },
-        { href: '/students', label: 'Students', icon: 'users' },
-        { href: '/classes', label: 'Classes', icon: 'classes', primary: true },
         { href: '/scores', label: 'Scores', icon: 'scores', primary: true },
-        { href: '/fees', label: 'Fees', icon: 'fees' },
+        { href: '/classes', label: 'Classes', icon: 'classes', primary: true },
         { href: '/report-cards', label: 'Report cards', icon: 'report', primary: true },
+        { href: '/students', label: 'Students', icon: 'users' },
+        { href: '/fees', label: 'Fees', icon: 'fees' },
         { href: '/team', label: 'Team', icon: 'team' },
       ];
     case 'staff':
       return [
         { href: '/dashboard', label: 'Dashboard', icon: 'home', primary: true },
-        { href: '/classes', label: 'Classes', icon: 'classes', primary: true },
         { href: '/scores', label: 'Scores', icon: 'scores', primary: true },
+        { href: '/classes', label: 'Classes', icon: 'classes', primary: true },
         { href: '/report-cards', label: 'Report cards', icon: 'report', primary: true },
         { href: '/attendance', label: 'Attendance', icon: 'attendance' },
         { href: '/students', label: 'Students', icon: 'users' },

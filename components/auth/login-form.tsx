@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 
 import { signInAction } from '@/app/login/actions';
 import { useActionToast } from '@/components/ui/use-action-toast';
@@ -10,6 +10,7 @@ import type { ActionResult } from '@/lib/actions/result';
 
 export function LoginForm({ next }: { next?: string }) {
   const [state, formAction] = useActionState<ActionResult | null, FormData>(signInAction, null);
+  const [showPassword, setShowPassword] = useState(false);
   useActionToast(state);
 
   const generalError = state && !state.ok && !state.fieldErrors ? state.message : null;
@@ -33,15 +34,12 @@ export function LoginForm({ next }: { next?: string }) {
 
       <div>
         <label htmlFor="password" className="field-label">Password</label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          className="field-input"
-          aria-invalid={Boolean(state?.fieldErrors?.password)}
-        />
+        <div className="relative">
+          <input id="password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" required className="field-input pr-24" aria-invalid={Boolean(state?.fieldErrors?.password)} />
+          <button type="button" onClick={() => setShowPassword((value) => !value)} aria-pressed={showPassword} className="absolute inset-y-1 right-1 min-h-10 rounded-lg px-3 text-sm font-medium text-[var(--accent)] hover:bg-[var(--bg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+            {showPassword ? 'Hide' : 'Show'} password
+          </button>
+        </div>
         <FieldError messages={state?.fieldErrors?.password} />
       </div>
 

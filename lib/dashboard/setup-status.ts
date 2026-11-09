@@ -37,9 +37,9 @@ export async function getSetupItems(
   ]);
 
   return [
-    { key: 'classes', label: 'Add classes', description: 'Create each class, with groups if it has them.', href: '/students', done: classes > 0 },
-    { key: 'subjects', label: 'Add subjects', description: 'List the subjects taught in the school.', href: '/students', done: subjects > 0 },
-    { key: 'terms', label: 'Add terms', description: 'Set the start and end dates of each term.', href: '/students', done: terms > 0 },
+    { key: 'classes', label: 'Add classes', description: 'Create each class, with groups if it has them.', href: '/classes', done: classes > 0 },
+    { key: 'subjects', label: 'Add subjects', description: 'List the subjects taught in the school.', href: '/students#subjects', done: subjects > 0 },
+    { key: 'terms', label: 'Add terms', description: 'Set the start and end dates of each term.', href: '/students#terms', done: terms > 0 },
     { key: 'students', label: 'Enrol students', description: 'Add students one by one or upload a file.', href: '/students', done: students > 0 },
     { key: 'team', label: 'Invite teachers', description: 'Teachers enter scores and results.', href: '/team', done: (teamMembers.count ?? 0) > 0 },
     { key: 'grading', label: 'Set grading weights', description: 'Grades cannot be computed until the weights are set.', href: '/grading', done: (gradingKeys.count ?? 0) > 0 },

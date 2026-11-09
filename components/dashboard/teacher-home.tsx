@@ -124,6 +124,10 @@ export async function TeacherHome({
     (sum, c) => sum + c.assessments.filter((a) => a.scored < a.total).length,
     0,
   );
+  const workItems = cards.flatMap((card) => card.assessments.map((assessment) => ({
+    ...assessment, className: card.name,
+  }))).filter((assessment) => assessment.scored < assessment.total)
+    .sort((a, b) => (b.total - b.scored) - (a.total - a.scored));
 
   return (
     <div className="flex flex-col gap-6">
@@ -133,6 +137,21 @@ export async function TeacherHome({
         <Summary label="Scores to add" value={needScores} />
       </section>
 
+      {workItems.length > 0 && (
+        <section aria-labelledby="work-heading" className="depth-card p-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div><h2 id="work-heading" className="text-lg font-semibold">Your next work</h2>
+              <p className="mt-1 text-sm text-[var(--muted)]">Assessments with scores still to enter, most outstanding first.</p></div>
+            <Link href="/scores" className="btn btn-primary min-h-11">Open scorebook</Link>
+          </div>
+          <ul className="mt-4 divide-y divide-[var(--border)]">
+            {workItems.slice(0, 5).map((item) => <li key={item.id} className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm">
+              <span className="min-w-0"><strong>{item.title}</strong><span className="text-[var(--muted)]"> · {item.className} · {item.subject}</span></span>
+              <span className="badge tone-warning">{item.total - item.scored} remaining</span>
+            </li>)}
+          </ul>
+        </section>
+      )}
       {currentTerm && (
         <p className="text-sm text-[var(--muted)]">
           Report comments for {currentTerm.name}: {commentsDone} of {totalStudents} written.

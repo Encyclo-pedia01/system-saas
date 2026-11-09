@@ -72,16 +72,16 @@ function ScoreTable({
   return (
     <form action={action} className="space-y-4" noValidate>
       {Object.entries(hidden).map(([name, value]) => <input key={name} type="hidden" name={name} value={value} />)}
-      <div className="overflow-x-auto rounded-2xl border border-[var(--border)]">
+      <div className="overflow-hidden rounded-2xl border border-[var(--border)]">
         <table className="w-full text-left text-sm">
           <thead className="bg-[var(--hover)] text-xs uppercase tracking-wider text-[var(--muted)]">
             <tr><th className="px-4 py-3">Student</th><th className="px-4 py-3">Score (out of {max})</th></tr>
           </thead>
           <tbody className="divide-y divide-[var(--border)]">
             {students.map((student) => (
-              <tr key={student.id}>
-                <td className="px-4 py-2.5 font-medium">{student.full_name}</td>
-                <td className="px-4 py-2">
+              <tr key={student.id} className="block border-b border-[var(--border)] last:border-0 sm:table-row">
+                <td className="block px-4 pt-3 font-medium sm:table-cell sm:py-2.5">{student.full_name}</td>
+                <td className="block px-4 pb-3 pt-1 sm:table-cell sm:py-2">
                   <input
                     name={`score_${student.id}`}
                     type="number"
@@ -91,7 +91,7 @@ function ScoreTable({
                     step="0.5"
                     defaultValue={existing[student.id] ?? ''}
                     aria-label={`Score for ${student.full_name}`}
-                    className="field-input max-w-32"
+                    className="field-input min-h-11 w-full max-w-none sm:max-w-32"
                   />
                 </td>
               </tr>
@@ -99,7 +99,7 @@ function ScoreTable({
           </tbody>
         </table>
       </div>
-      <SubmitButton pendingLabel={pendingLabel}>{submitLabel}</SubmitButton>
+      {students.length === 0 ? <p className="text-sm text-[var(--muted)]">No students are enrolled in this class.</p> : <SubmitButton pendingLabel={pendingLabel}>{submitLabel}</SubmitButton>}
     </form>
   );
 }

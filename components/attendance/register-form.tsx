@@ -48,27 +48,20 @@ export function RegisterForm({
       ))}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-[var(--muted)]" aria-live="polite">
-          {present.size} of {students.length} present
+        <p className="text-sm font-medium" aria-live="polite">
+          <span className="text-lg font-semibold text-[var(--accent)]">{present.size}</span> of {students.length} present
         </p>
-        {canWrite && (
-          <button
-            type="button"
-            className="btn btn-ghost min-h-11 px-4 text-sm"
-            onClick={() => setPresent(new Set(students.map((s) => s.id)))}
-          >
-            Mark all present
-          </button>
-        )}
+        {canWrite && <div className="flex flex-wrap gap-2"><button type="button" className="btn btn-ghost min-h-11 px-4 text-sm" onClick={() => setPresent(new Set(students.map((s) => s.id)))}>Mark all present</button><button type="button" className="btn btn-ghost min-h-11 px-4 text-sm" onClick={() => setPresent(new Set())} disabled={present.size === 0}>Clear all</button></div>}
       </div>
 
       <ul className="divide-y divide-[var(--border)] rounded-2xl border border-[var(--border)]">
         {students.map((s) => (
           <li key={s.id}>
-            <label className="flex min-h-14 cursor-pointer items-center justify-between gap-4 px-4 py-3">
-              <span className="min-w-0">
-                <span className="block truncate font-medium">{s.name}</span>
-                <span className="block text-xs text-[var(--muted)]">{s.admission}</span>
+            <label className={`flex min-h-[4.5rem] cursor-pointer items-center justify-between gap-4 px-4 py-3 transition-colors ${present.has(s.id) ? 'bg-[var(--tone-success-bg)]/40' : 'hover:bg-[var(--hover)]'}`}>
+              <span className="flex min-w-0 items-center gap-3">
+                <span aria-hidden="true" className={`flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${present.has(s.id) ? 'bg-[var(--tone-success-bg)] text-[var(--tone-success-text)]' : 'bg-[var(--hover)] text-[var(--muted)]'}`}>{present.has(s.id) ? 'P' : '—'}</span>
+                <span className="min-w-0"><span className="block truncate font-medium">{s.name}</span>
+                <span className="mt-0.5 block text-xs text-[var(--muted)]"><span className="md:hidden">Admission no. </span>{s.admission}</span></span>
               </span>
               <input
                 type="checkbox"
@@ -76,7 +69,7 @@ export function RegisterForm({
                 checked={present.has(s.id)}
                 disabled={!canWrite}
                 onChange={(event) => toggle(s.id, event.currentTarget.checked)}
-                aria-label={`${s.name} present`}
+                aria-label={`Mark ${s.name} present`}
               />
             </label>
           </li>

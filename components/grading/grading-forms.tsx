@@ -36,8 +36,13 @@ export function GradingWeightsForm({
           <FieldError messages={state?.fieldErrors?.exam} />
         </div>
       </div>
-      <p className="text-xs text-[var(--muted)]">The two weights must add up to 100.</p>
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--hover)] p-4 text-sm">
+        <p className="font-semibold">How the final mark is calculated</p>
+        <p className="mt-1 text-[var(--muted)]">Assessment mark × assessment weight + exam mark × exam weight. Both weights must add up to 100%.</p>
+        <p className="mt-2 text-xs text-[var(--muted)]">Changing these weights affects future computations. Existing grades are not automatically recomputed.</p>
+      </div>
       {state && !state.ok && !state.fieldErrors && <p role="alert" className="form-error">{state.message}</p>}
+      {state?.ok && <p role="status" className="text-sm text-[var(--tone-success-text)]">{state.message}</p>}
       {!readOnly && <SubmitButton pendingLabel="Saving…">Save weights</SubmitButton>}
     </form>
   );
@@ -79,6 +84,7 @@ export function ComputeGradesForm({
         </div>
       </div>
       {state && !state.ok && !state.fieldErrors && <p role="alert" className="form-error">{state.message}</p>}
+      {state?.ok && <p role="status" className="text-sm text-[var(--tone-success-text)]">{state.message}</p>}
       {!disabled && <SubmitButton pendingLabel="Computing…">Compute final grades</SubmitButton>}
     </form>
   );

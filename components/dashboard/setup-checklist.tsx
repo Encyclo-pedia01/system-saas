@@ -63,7 +63,7 @@ function ChecklistItems({ items, nextStep }: { items: SetupItem[]; nextStep: Set
             <p className="ml-6 text-xs text-[var(--muted)]">{item.description}</p>
           </div>
           {!item.done && (
-            <Link href={item.href} className="btn btn-ghost min-h-11 px-4 text-sm">
+            <Link href={item.href} aria-label={`${item.label}: open setup`} className="btn btn-ghost min-h-11 px-4 text-sm">
               Open
             </Link>
           )}

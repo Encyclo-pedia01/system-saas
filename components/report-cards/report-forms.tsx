@@ -11,6 +11,7 @@ import {
   unlockFinalAction,
 } from '@/app/(app)/report-cards/actions';
 import { FieldError } from '@/components/ui/field-error';
+import { ConfirmedSubmitForm } from '@/components/ui/confirmed-submit-form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { useActionToast } from '@/components/ui/use-action-toast';
 import type { ActionResult } from '@/lib/actions/result';
@@ -136,6 +137,7 @@ export function RemarksForm({
     <form action={action} className="space-y-3" noValidate>
       <input type="hidden" name="termId" value={termId} />
       <input type="hidden" name="studentId" value={studentId} />
+      <p className="text-xs text-[var(--muted)]">Blank remarks are not saved as deletions. Clearing a field leaves its saved remark unchanged; ask an administrator if a saved remark must be removed.</p>
       {canClassTeacher ? (
         <div>
           <label className="field-label" htmlFor={`ct-${studentId}`}>Class teacher remark for {studentName}</label>
@@ -166,12 +168,18 @@ export function MarkFinalForm({ termId, classId, studentIds, label }: { termId: 
   useActionToast(state);
 
   return (
-    <form action={action}>
+    <ConfirmedSubmitForm
+      action={action}
+      title={`Mark ${studentIds.length === 1 ? 'this report card' : `all ${studentIds.length} report cards`} final?`}
+      description="Final cards become locked snapshots and do not reflect later grade or remark changes. Review the selected term, class, and student count before continuing."
+      actionLabel={label}
+      pendingLabel="Marking…"
+      variant="primary"
+    >
       <input type="hidden" name="termId" value={termId} />
       <input type="hidden" name="classId" value={classId} />
       {studentIds.map((id) => <input key={id} type="hidden" name="studentId" value={id} />)}
-      <SubmitButton pendingLabel="Marking…">{label}</SubmitButton>
-    </form>
+    </ConfirmedSubmitForm>
   );
 }
 
@@ -180,10 +188,17 @@ export function UnlockFinalForm({ termId, studentId }: { termId: string; student
   useActionToast(state);
 
   return (
-    <form action={action}>
+    <ConfirmedSubmitForm
+      action={action}
+      className="inline-flex"
+      title="Unlock this report card?"
+      description="This removes its saved final snapshot and returns the card to draft status, so remarks and grades can change before finalization again."
+      actionLabel="Unlock report card"
+      pendingLabel="Unlocking…"
+      variant="danger"
+    >
       <input type="hidden" name="termId" value={termId} />
       <input type="hidden" name="studentId" value={studentId} />
-      <SubmitButton variant="ghost" pendingLabel="Unlocking…">Unlock</SubmitButton>
-    </form>
+    </ConfirmedSubmitForm>
   );
 }

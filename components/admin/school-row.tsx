@@ -4,6 +4,7 @@ import { useActionState } from 'react';
 
 import { startImpersonationAction, toggleSchoolStatusAction, updateSubscriptionAction } from '@/app/(app)/admin/actions';
 import { FieldError } from '@/components/ui/field-error';
+import { ConfirmedSubmitForm } from '@/components/ui/confirmed-submit-form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { useActionToast } from '@/components/ui/use-action-toast';
 import type { ActionResult } from '@/lib/actions/result';
@@ -57,7 +58,7 @@ export function SchoolRow({ school }: { school: SchoolView }) {
           Owner invite: {invitation ? `${invitation.email} · ${invitation.accepted_at ? 'accepted' : 'pending'}` : 'none recorded'}
         </p>
         <p className="text-xs text-[var(--muted)]">
-          Subscription: {accessLabel(school)}{school.licence_reference ? ` · ref ${school.licence_reference}` : ''}
+          Access: {accessLabel(school)}{school.licence_reference ? ` · ref ${school.licence_reference}` : ''}
         </p>
 
         <details className="pt-2">
@@ -89,13 +90,10 @@ export function SchoolRow({ school }: { school: SchoolView }) {
       </div>
 
       <div className="flex flex-col gap-3">
-        <form action={statusAction} className="flex flex-wrap items-center gap-2">
+        <ConfirmedSubmitForm action={statusAction} className="flex flex-wrap items-center gap-2" title={suspended ? `Reactivate ${school.name}?` : `Suspend ${school.name}?`} description={suspended ? 'Reactivating restores this school’s access to the platform.' : 'Suspending stops this school’s users from accessing the platform. Its records remain stored; this does not delete the school.'} actionLabel={suspended ? 'Reactivate school' : 'Suspend school'} pendingLabel="Updating…" variant={suspended ? 'primary' : 'danger'}>
           <input type="hidden" name="institutionId" value={school.id} />
           <input type="hidden" name="status" value={suspended ? 'active' : 'suspended'} />
-          <SubmitButton variant={suspended ? 'primary' : 'danger'} pendingLabel="Updating…">
-            {suspended ? 'Reactivate school' : 'Suspend school'}
-          </SubmitButton>
-        </form>
+        </ConfirmedSubmitForm>
 
         <form action={viewAction} className="space-y-2">
           <input type="hidden" name="institutionId" value={school.id} />

@@ -224,10 +224,16 @@ export function EditClassForm({ classItem }: { classItem: ClassRecord }) {
             {classItem.groups.map((group) => (
               <li key={group.id} className="flex items-center justify-between py-2">
                 <span>{classItem.name} {group.name}</span>
-                <form action={removeGroupAction}>
-                  <input type="hidden" name="groupId" value={group.id} />
-                  <button type="submit" className="btn btn-ghost text-xs">Remove</button>
-                </form>
+                <TypedConfirm
+                  action={removeGroupAction}
+                  hiddenFields={{ groupId: group.id }}
+                  itemName={group.name}
+                  triggerLabel="Remove group"
+                  title={`Remove ${classItem.name} ${group.name}?`}
+                  consequence={<p>Groups with enrolled students cannot be removed. If this group is empty, removing it is permanent; confirm the group name to continue.</p>}
+                  confirmLabel="Remove group"
+                  pendingLabel="Removing…"
+                />
               </li>
             ))}
           </ul>

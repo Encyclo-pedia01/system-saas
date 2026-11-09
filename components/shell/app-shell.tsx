@@ -40,7 +40,7 @@ export function AppShell({
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const drawerRef = useRef<HTMLElement>(null);
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const returnFocusRef = useRef<HTMLButtonElement>(null);
   const signOutDialogRef = useRef<HTMLDialogElement>(null);
 
   // Escape closes the drawer, Tab cycles inside it, and focus returns to the Menu button on close.
@@ -50,7 +50,7 @@ export function AppShell({
     const focusableItems = () =>
       drawerRef.current ? Array.from(drawerRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')) : [];
 
-    const menuButton = menuButtonRef.current;
+    const returnFocus = returnFocusRef.current;
     focusableItems()[0]?.focus();
 
     function onKeyDown(event: KeyboardEvent) {
@@ -77,7 +77,7 @@ export function AppShell({
     document.addEventListener('keydown', onKeyDown);
     return () => {
       document.removeEventListener('keydown', onKeyDown);
-      menuButton?.focus();
+      returnFocus?.focus();
     };
   }, [drawerOpen]);
 
@@ -86,23 +86,15 @@ export function AppShell({
     .filter((item) => pathname === item.href || pathname.startsWith(`${item.href}/`))
     .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
-  const initials =
-    (userName || 'User')
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((word) => word.charAt(0))
-      .join('')
-      .toUpperCase() || 'U';
-
   // Phone bottom bar: the screens each role uses most (marked primary in the layout). Everything else sits under More.
   const primaryItems = navItems.filter((item) => item.primary);
+  const secondaryItems = navItems.filter((item) => !item.primary);
   // Platform admins have no main screens, so they keep the Menu button.
   const useBottomBar = primaryItems.length >= 2;
 
-  const navigation = (
-    <nav className="flex flex-col gap-1" aria-label="Main">
-      {navItems.map((item) => {
+  const renderNavigation = (items: NavItem[], label = 'Main') => (
+    <nav className="flex flex-col gap-1" aria-label={label}>
+      {items.map((item) => {
         const active = item.href === activeHref;
 
         return (
@@ -113,7 +105,7 @@ export function AppShell({
             onClick={() => setDrawerOpen(false)}
             className={`group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
               active
-                ? 'bg-[var(--accent)] text-[var(--on-accent)] shadow-[0_6px_16px_-8px_rgba(30,91,184,0.6)]'
+                ? 'bg-[var(--accent)] text-[var(--on-accent)] shadow-sm'
                 : 'text-[var(--muted)] hover:translate-x-0.5 hover:bg-[var(--hover)] hover:text-[var(--text)]'
             }`}
           >
@@ -144,31 +136,36 @@ export function AppShell({
   return (
     <>
     <div className="flex min-h-0 flex-1">
-      <aside className="depth-card sticky top-4 m-4 hidden h-[calc(100vh-2rem)] w-64 shrink-0 flex-col gap-6 p-5 md:flex">
+      <aside className="depth-card sticky top-3 m-3 hidden h-[calc(100vh-1.5rem)] w-56 shrink-0 flex-col gap-5 p-4 md:flex xl:top-4 xl:m-4 xl:h-[calc(100vh-2rem)] xl:w-64 xl:gap-6 xl:p-5">
         <div>
           <p className="eyebrow">Campus Veritas</p>
           <p className="mt-1 truncate text-lg font-bold">{schoolName ?? 'Platform'}</p>
         </div>
-        {navigation}
+        {renderNavigation(navItems)}
         {identityCard}
       </aside>
 
-      <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center justify-between border-b border-[var(--border)] bg-[var(--header-bg)] px-4 backdrop-blur-md md:hidden">
+      <header className="fixed inset-x-0 top-0 z-30 flex h-[calc(3.5rem_+_env(safe-area-inset-top))] items-center justify-between border-b border-[var(--border)] bg-[var(--header-bg)] px-4 pt-[env(safe-area-inset-top)] backdrop-blur-md md:hidden">
         <div className="flex min-w-0 items-center gap-2.5">
           <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-lg bg-[var(--accent)] text-sm font-bold text-[var(--on-accent)]">
             {(schoolName ?? 'P').charAt(0).toUpperCase()}
           </span>
-          <p className="truncate text-base font-bold tracking-tight">{schoolName ?? 'Platform'}</p>
+          <div className="min-w-0">
+            <p className="truncate text-[0.65rem] font-medium text-[var(--muted)]">{schoolName ?? 'Platform'}</p>
+            <p className="truncate text-sm font-bold tracking-tight">{navItems.find((item) => item.href === activeHref)?.label ?? 'Menu'}</p>
+          </div>
         </div>
         <button
           type="button"
-          ref={menuButtonRef}
-          onClick={() => setDrawerOpen(true)}
+          onClick={(event) => { returnFocusRef.current = event.currentTarget; setDrawerOpen(true); }}
           aria-expanded={drawerOpen}
-          aria-label="Open account and navigation"
-          className="grid size-9 shrink-0 place-items-center rounded-full bg-[var(--tone-accent-bg)] text-xs font-bold text-[var(--accent)]"
+          aria-haspopup="dialog"
+          aria-controls="mobile-navigation-drawer"
+          aria-label="Open navigation menu"
+          className="btn btn-ghost min-h-10 gap-2 px-3 text-xs"
         >
-          {initials}
+          <Icon name="more" className="size-4" />
+          Menu
         </button>
       </header>
 
@@ -186,11 +183,12 @@ export function AppShell({
             />
             <motion.aside
               key="drawer"
+              id="mobile-navigation-drawer"
               role="dialog"
               aria-modal="true"
               aria-label="Navigation"
               ref={drawerRef}
-              className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col gap-6 rounded-none border-r border-[var(--border)] bg-[var(--surface)] p-5 shadow-2xl md:hidden"
+              className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col gap-5 overflow-y-auto overscroll-contain rounded-none border-r border-[var(--border)] bg-[var(--surface)] px-5 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] shadow-2xl md:hidden"
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
@@ -202,7 +200,12 @@ export function AppShell({
                   Close
                 </button>
               </div>
-              {navigation}
+              {useBottomBar ? (
+                <>
+                  <p className="eyebrow">More</p>
+                  {secondaryItems.length > 0 ? renderNavigation(secondaryItems, 'More screens') : <p className="text-sm text-[var(--muted)]">No additional screens for this account.</p>}
+                </>
+              ) : navItems.length > 0 ? renderNavigation(navItems) : <p className="text-sm text-[var(--muted)]">No navigation screens are available for this account. Account actions are below.</p>}
               {identityCard}
             </motion.aside>
           </>
@@ -226,7 +229,7 @@ export function AppShell({
                   active ? 'text-[var(--accent)]' : 'text-[var(--muted)]'
                 }`}
               >
-                <span className="grid h-7 w-12 place-items-center rounded-full">
+                <span className={`grid h-7 w-12 place-items-center rounded-full ${active ? 'bg-[var(--tone-accent-bg)]' : ''}`}>
                   <Icon name={item.icon} filled={active} className="size-6" />
                 </span>
                 <span className="truncate">{item.label}</span>
@@ -235,10 +238,11 @@ export function AppShell({
           })}
           <button
             type="button"
-            ref={menuButtonRef}
-            onClick={() => setDrawerOpen(true)}
+            onClick={(event) => { returnFocusRef.current = event.currentTarget; setDrawerOpen(true); }}
             aria-expanded={drawerOpen}
-            aria-label="More screens"
+            aria-haspopup="dialog"
+            aria-controls="mobile-navigation-drawer"
+            aria-label="Open More menu"
             className="flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-[0.7rem] font-semibold text-[var(--muted)]"
           >
             <span className="grid h-7 w-12 place-items-center rounded-full">
@@ -265,7 +269,7 @@ export function AppShell({
         )}
 
         <motion.main
-          className={`flex min-w-0 flex-1 flex-col px-4 pt-20 md:px-8 md:pt-8 ${useBottomBar ? "pb-28 md:pb-16" : "pb-16"}`}
+          className={`flex min-w-0 flex-1 flex-col px-4 pt-[calc(5rem_+_env(safe-area-inset-top))] md:px-6 md:pt-8 xl:px-8 ${useBottomBar ? "pb-[calc(7rem_+_env(safe-area-inset-bottom))] md:pb-16" : "pb-16"}`}
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}

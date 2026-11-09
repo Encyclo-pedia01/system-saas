@@ -82,7 +82,11 @@ export default async function DashboardPage() {
         }))
       : null;
 
-  const insights = (insightsResult.data ?? []) as InsightView[];
+  const severityRank = { high: 0, medium: 1, low: 2 } as const;
+  const insights = ((insightsResult.data ?? []) as InsightView[]).sort(
+    (a, b) => severityRank[a.severity] - severityRank[b.severity] ||
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
   const guideHidden = (await cookies()).get('setup_guide')?.value === 'hidden';
 
   return (
@@ -101,8 +105,9 @@ export default async function DashboardPage() {
 
         <section aria-labelledby="feed-heading" className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <h2 id="feed-heading" className="text-lg font-semibold">Feed</h2>
-            <span className="text-xs text-[var(--muted)]">Updates generated automatically</span>
+            <div><h2 id="feed-heading" className="text-lg font-semibold">Priority feed</h2>
+              <p className="mt-1 text-xs text-[var(--muted)]">Highest-severity alerts first · updates generated automatically</p></div>
+            <span className="badge bg-[var(--highlight)] text-[var(--highlight-text)]">{insights.length} open</span>
           </div>
 
           {insights.length === 0 ? (

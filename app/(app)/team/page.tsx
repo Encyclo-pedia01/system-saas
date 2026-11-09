@@ -5,7 +5,7 @@ import { InviteMemberForm } from '@/components/team/invite-member-form';
 import { EmptyState } from '@/components/ui/empty-state';
 import { GlassCard } from '@/components/ui/glass-card';
 import { PageHeader } from '@/components/ui/page-header';
-import { SubmitButton } from '@/components/ui/submit-button';
+import { ConfirmedSubmitForm } from '@/components/ui/confirmed-submit-form';
 import { requireEffectiveRole } from '@/lib/auth/viewer';
 import { createClient } from '@/lib/supabase/server';
 
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 const roleLabels: Record<string, string> = {
   owner: 'School owner',
-  school_admin: 'Encyclopedia',
+  school_admin: 'School administrator',
   staff: 'Teacher',
 };
 
@@ -61,9 +61,9 @@ export default async function TeamPage() {
           ) : (
             <ul className="divide-y divide-[var(--border)] text-sm">
               {members.map((member) => (
-                <li key={member.id} className="flex items-center justify-between py-3">
-                  <span className="font-medium">{roleLabels[member.role] ?? member.role}</span>
-                  <span className="text-xs text-[var(--muted)]">Joined {new Date(member.created_at).toLocaleDateString('en-GB')}</span>
+                <li key={member.id} className="flex items-center justify-between gap-4 py-3">
+                  <div><span className="font-medium">{roleLabels[member.role] ?? member.role}</span><p className="text-xs text-[var(--muted)]">Member</p></div>
+                  <span className="shrink-0 text-xs text-[var(--muted)]">Joined {new Date(member.created_at).toLocaleDateString('en-GB')}</span>
                 </li>
               ))}
             </ul>
@@ -71,7 +71,8 @@ export default async function TeamPage() {
         </GlassCard>
 
         <GlassCard className="p-6">
-          <h2 className="mb-4 text-lg font-semibold">Pending invitations</h2>
+          <h2 className="mb-1 text-lg font-semibold">Pending invitations</h2>
+          <p className="mb-4 text-sm text-[var(--muted)]">Unaccepted teacher invites only. Expired invites are no longer active.</p>
           {pending.length === 0 ? (
             <EmptyState title="No pending invitations">Invitations you send appear here until they are accepted.</EmptyState>
           ) : (
@@ -83,10 +84,9 @@ export default async function TeamPage() {
                     <p className="text-xs text-[var(--muted)]">{roleLabels[invite.role] ?? invite.role} · expires {new Date(invite.expires_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Accra' })}</p>
                   </div>
                   {canRevoke && (
-                    <form action={revokeInvitationAction}>
+                    <ConfirmedSubmitForm action={revokeInvitationAction} className="shrink-0" title={`Cancel invite for ${invite.email}?`} description="The invitation link will stop working. You will need to send a new invitation if this person still needs access." actionLabel="Cancel invitation" pendingLabel="Cancelling…" variant="danger">
                       <input type="hidden" name="invitationId" value={invite.id} />
-                      <SubmitButton variant="ghost" pendingLabel="Cancelling…">Cancel</SubmitButton>
-                    </form>
+                    </ConfirmedSubmitForm>
                   )}
                 </li>
               ))}

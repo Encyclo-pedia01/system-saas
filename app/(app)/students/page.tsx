@@ -5,6 +5,7 @@ import { StudentForm, type ClassOption } from '@/components/students/student-for
 import { StudentUpload } from '@/components/students/student-upload';
 import { SubjectForm, TermForm } from '@/components/students/setup-forms';
 import { SuggestedSubjects } from '@/components/students/suggested-subjects';
+import { StudentRoster } from '@/components/students/student-roster';
 import { EmptyState } from '@/components/ui/empty-state';
 import { GlassCard } from '@/components/ui/glass-card';
 import { requireEffectiveRole } from '@/lib/auth/viewer';
@@ -51,11 +52,11 @@ export default async function StudentsPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader backHref="/dashboard" eyebrow="Records" title="Students" description={<>{students.length} students across {classes.length} classes.</>} />
+      <PageHeader backHref="/dashboard" eyebrow="Records" title="Students" description={<>{students.length} students across {classes.length} classes. Enrol individually, import a roster, or find a student below.</>} />
 
       {(canStructure || canEnrol) && (
-        <div className="grid gap-6 lg:grid-cols-2">
-          {canStructure && <GlassCard className="p-6"><h2 className="mb-2 text-lg font-semibold">Classes</h2><p className="mb-4 text-sm text-[var(--muted)]">Add and edit classes, their groups, and class teachers on the Classes page.</p><Link href="/classes" className="btn btn-ghost">Go to Classes</Link></GlassCard>}
+        <div className="grid gap-5 lg:grid-cols-2">
+          {canStructure && <GlassCard className="p-6"><p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--accent-soft)]">Structure</p><h2 className="mb-2 text-lg font-semibold">Classes and groups</h2><p className="mb-4 text-sm text-[var(--muted)]">Manage class levels, groups, and teacher assignments separately from student enrolment.</p><Link href="/classes" className="btn btn-ghost min-h-11">Manage classes</Link></GlassCard>}
           {canEnrol && (
             <GlassCard className="p-6"><h2 className="mb-4 text-lg font-semibold">Enrol a student</h2>
               {classes.length === 0 ? <p className="text-sm text-[var(--muted)]">Add a class first.</p> : <StudentForm classes={classes} />}
@@ -74,37 +75,13 @@ export default async function StudentsPage() {
 
       {canStructure && (
         <div className="grid gap-6 lg:grid-cols-2">
-          <GlassCard className="p-6"><h2 className="mb-1 text-lg font-semibold">Suggested subjects</h2><p className="mb-4 text-sm text-[var(--muted)]">Tap a subject to add it. Nothing is added until you tap.</p><SuggestedSubjects groups={suggestedGroups} /></GlassCard>
+          <GlassCard className="p-6"><h2 id="subjects" className="mb-1 scroll-mt-24 text-lg font-semibold">Suggested subjects</h2><p className="mb-4 text-sm text-[var(--muted)]">Tap a subject to add it. Nothing is added until you tap.</p><SuggestedSubjects groups={suggestedGroups} /></GlassCard>
           <GlassCard className="p-6"><h2 className="mb-4 text-lg font-semibold">Add a subject</h2><SubjectForm /></GlassCard>
-          <GlassCard className="p-6"><h2 className="mb-4 text-lg font-semibold">Add a term</h2><TermForm /></GlassCard>
+          <GlassCard className="p-6"><h2 id="terms" className="mb-4 scroll-mt-24 text-lg font-semibold">Add a term</h2><TermForm /></GlassCard>
         </div>
       )}
 
-      <div className="grid gap-5 lg:grid-cols-2">
-        {classes.length === 0 && <div className="lg:col-span-2"><EmptyState title="No classes yet">Add a class to start enrolling students.</EmptyState></div>}
-        {classes.map((schoolClass) => {
-          const members = students.filter((s) => s.class_id === schoolClass.id);
-          return (
-            <section key={schoolClass.id} className="depth-card p-5" aria-labelledby={`cls-${schoolClass.id}`}>
-              <div className="mb-3 flex items-center justify-between">
-                <h2 id={`cls-${schoolClass.id}`} className="text-base font-semibold">{schoolClass.name}</h2>
-                <span className="badge bg-[var(--hover)] text-[var(--muted)]">{members.length}</span>
-              </div>
-              <ul className="mt-3 divide-y divide-[var(--border)] text-sm">
-                {members.length === 0 && <li className="py-3 text-sm text-[var(--muted)]">No students enrolled.</li>}
-                {members.map((s) => (
-                  <li key={s.id} className="flex items-center justify-between py-2.5">
-                    <span className="font-medium">{s.full_name}</span>
-                    <span className="text-xs text-[var(--muted)]">
-                      {s.group_id && groupNameById.get(s.group_id) ? `${schoolClass.name} ${groupNameById.get(s.group_id)} · ` : ''}{s.admission_number}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          );
-        })}
-      </div>
+      {classes.length === 0 ? <EmptyState title="No classes yet">Add a class to start enrolling students.</EmptyState> : <StudentRoster classes={classes.map((schoolClass) => ({ ...schoolClass, students: students.filter((student) => student.class_id === schoolClass.id) }))} groupNameById={Object.fromEntries(groupNameById)} />}
     </div>
   );
 }

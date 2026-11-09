@@ -98,7 +98,7 @@ export default async function ReportCardsPage({ searchParams }: { searchParams: 
         eyebrow="Records"
         title="Report cards"
         description={`${schoolClass.name} · ${term.name}`}
-        action={isOwner ? <Link href="/report-cards/setup" className="btn btn-ghost">Setup</Link> : <Link href={`/report-cards/preview?classId=${schoolClass.id}&termId=${term.id}`} className="btn btn-ghost">Preview cards</Link>}
+        action={<div className="flex flex-wrap gap-2">{isOwner && <Link href="/report-cards/setup" className="btn btn-ghost">Setup</Link>}<Link href={`/report-cards/preview?classId=${schoolClass.id}&termId=${term.id}`} className="btn btn-ghost">Preview cards</Link></div>}
       />
 
       <GlassCard className="p-6">
@@ -135,6 +135,16 @@ export default async function ReportCardsPage({ searchParams }: { searchParams: 
           </p>
         </GlassCard>
       )}
+
+      <GlassCard className="flex flex-wrap items-center justify-between gap-3 p-4">
+        <div>
+          <p className="font-semibold">Class report-card progress</p>
+          <p className="text-sm text-[var(--muted)]">{finalIds.size} of {students.length} final · {draftIds.length} draft · {missingNames.length} {missingNames.length === 1 ? 'student' : 'students'} with missing grades</p>
+        </div>
+        <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--hover)] sm:w-48" role="progressbar" aria-label="Final report cards" aria-valuemin={0} aria-valuemax={students.length} aria-valuenow={finalIds.size}>
+          <div className="h-full rounded-full bg-[var(--accent)]" style={{ width: `${students.length ? (finalIds.size / students.length) * 100 : 0}%` }} />
+        </div>
+      </GlassCard>
 
       {students.length === 0 ? (
         <EmptyState title="No students in this class">Enrol students on the Students page.</EmptyState>

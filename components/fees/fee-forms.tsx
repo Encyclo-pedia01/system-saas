@@ -11,7 +11,6 @@ import {
 } from '@/app/(app)/fees/actions';
 import { FieldError } from '@/components/ui/field-error';
 import { ConfirmedSubmitForm } from '@/components/ui/confirmed-submit-form';
-import { SubmitButton } from '@/components/ui/submit-button';
 import { TypedConfirm } from '@/components/ui/typed-confirm';
 import { useActionToast } from '@/components/ui/use-action-toast';
 import type { ActionResult } from '@/lib/actions/result';
@@ -39,7 +38,7 @@ export function FeeItemForm({
   const errors = state?.fieldErrors;
 
   return (
-    <form action={action} className="grid gap-4 sm:grid-cols-2" noValidate>
+    <ConfirmedSubmitForm action={action} className="grid gap-4 sm:grid-cols-2" title="Charge students now?" description="Saving this fee immediately creates a charge for every student in the selected class, or every class if you choose All classes, for the selected term. Check the scope and amount before continuing; removing the fee later may not be possible after a payment is recorded for that term." actionLabel="Add fee and charge students" pendingLabel="Adding…" variant="primary">
       <div>
         <label htmlFor="feeTerm" className="field-label">Term</label>
         <select id="feeTerm" name="termId" required className="field-input" aria-invalid={Boolean(errors?.termId)}>
@@ -69,10 +68,7 @@ export function FeeItemForm({
         <input id="feeDue" name="dueOn" type="date" defaultValue={today} className="field-input" aria-invalid={Boolean(errors?.dueOn)} />
         <FieldError messages={errors?.dueOn} />
       </div>
-      <div className="flex items-end">
-        <SubmitButton pendingLabel="Adding…">Add fee</SubmitButton>
-      </div>
-    </form>
+    </ConfirmedSubmitForm>
   );
 }
 
@@ -108,7 +104,7 @@ export function PaymentForm({
   const errors = state?.fieldErrors;
 
   return (
-    <form action={action} className="grid gap-4 sm:grid-cols-2" noValidate>
+    <ConfirmedSubmitForm action={action} className="grid gap-4 sm:grid-cols-2" title="Record this payment?" description="This will post the entered amount as a payment against the selected student and term. Verify the student, amount, date, and payment method before confirming. Corrections require an owner to record a reversal." actionLabel="Record payment" pendingLabel="Recording…" variant="primary">
       <div className="sm:col-span-2">
         <label htmlFor="paymentStudent" className="field-label">Student</label>
         <select id="paymentStudent" name="studentId" required className="field-input" aria-invalid={Boolean(errors?.studentId)}>
@@ -150,10 +146,7 @@ export function PaymentForm({
         <input id="paymentNote" name="note" className="field-input" aria-invalid={Boolean(errors?.note)} />
         <FieldError messages={errors?.note} />
       </div>
-      <div className="sm:col-span-2">
-        <SubmitButton pendingLabel="Recording…">Record payment</SubmitButton>
-      </div>
-    </form>
+    </ConfirmedSubmitForm>
   );
 }
 

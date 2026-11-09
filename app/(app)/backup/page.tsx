@@ -24,15 +24,19 @@ export default async function BackupPage() {
       <GlassCard className="space-y-5 p-6 sm:p-8">
         <div>
           <h2 className="text-lg font-semibold">Download a backup</h2>
+          <p className="mt-1 text-sm font-medium text-[var(--warning)]">This export contains sensitive student and financial records.</p>
           <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
             The file contains your students, classes, groups, subjects, terms, assessments, scores, results, insights, fee records (fee items, charges, and payments), and report card records (grade bands, class teachers, remarks, and final cards), as JSON. It does not include staff passwords or sign-in details.
           </p>
         </div>
 
         {canDownload ? (
-          <a href="/backup-export" className="btn-primary inline-flex justify-center" download>
-            Download backup (JSON)
-          </a>
+          <div className="space-y-3">
+            <a href="/backup-export" className="btn-primary inline-flex min-h-11 justify-center" download aria-describedby="backup-private-note">
+              Download backup (JSON)
+            </a>
+            <p id="backup-private-note" className="text-sm text-[var(--muted)]">Save the file to an access-controlled location. Avoid shared devices, public links, or unencrypted email; delete extra copies when no longer needed.</p>
+          </div>
         ) : (
           <p className="text-sm text-[var(--muted)]">Backups cannot be downloaded in read-only view.</p>
         )}
