@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { Icon, type IconName } from '@/components/ui/icons';
 import { SubmitButton } from '@/components/ui/submit-button';
+import { SiteFooter } from '@/components/legal/site-footer';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export type NavItem = { href: string; label: string; icon: IconName; primary?: boolean };
@@ -143,8 +144,8 @@ export function AppShell({
   );
 
   return (
-    <div className="flex min-h-0 flex-1">
-      <aside className="depth-card sticky top-4 m-4 hidden h-[calc(100vh-2rem)] w-64 shrink-0 flex-col gap-6 p-5 md:flex">
+    <div className="app-shell flex min-h-0 flex-1">
+      <aside className="depth-card sticky top-4 m-4 hidden h-[calc(100vh-2rem)] w-64 shrink-0 flex-col gap-6 overflow-y-auto p-5 md:flex">
         <div>
           <p className="eyebrow">Campus Veritas</p>
           <p className="mt-1 truncate text-lg font-bold">{schoolName ?? 'Platform'}</p>
@@ -272,6 +273,7 @@ export function AppShell({
         >
           {children}
         </motion.main>
+        <SiteFooter />
       </div>
     </div>
   );

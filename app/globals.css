@@ -114,6 +114,11 @@ body:has(.login-page) {
   background: #ffffff;
 }
 
+/* Inside the app, the footer sits in the main column (see AppShell), not under the sidebar. */
+body:has(.app-shell) > footer {
+  display: none;
+}
+
 body:has(.login-page) footer {
   --muted: #56645a;
   --border: rgba(44, 57, 47, 0.15);
