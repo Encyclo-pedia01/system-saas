@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react';
 // Signs the user out after 30 minutes with no mouse, keyboard, touch or scroll activity.
 export const IDLE_LOGOUT_MS = 30 * 60 * 1000;
 const CHECK_EVERY_MS = 15 * 1000;
-const ACTIVITY_EVENTS = ['pointerdown', 'keydown', 'touchstart', 'scroll', 'wheel'] as const;
+const ACTIVITY_EVENTS = ['pointermove', 'pointerdown', 'keydown', 'touchstart', 'scroll', 'wheel'] as const;
 
 export function IdleLogout({ signOutAction }: { signOutAction: () => Promise<void> }) {
   const formRef = useRef<HTMLFormElement>(null);
