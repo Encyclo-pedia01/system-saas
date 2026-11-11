@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { LogoForm } from '@/components/report-cards/logo-form';
 import { ClassTeacherForm, GradeScaleForm, HeadmasterTagForm } from '@/components/report-cards/report-forms';
 import { EmptyState } from '@/components/ui/empty-state';
 import { GlassCard } from '@/components/ui/glass-card';
 import { PageHeader } from '@/components/ui/page-header';
 import { requireEffectiveRole } from '@/lib/auth/viewer';
+import { schoolLogoUrl } from '@/lib/school-logo';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
@@ -19,6 +21,8 @@ export default async function ReportCardSetupPage() {
   const canWrite = !viewer.readOnly;
 
   const supabase = await createClient();
+  const { data: institution } = await supabase.from('institutions').select('logo_path').eq('id', institutionId).maybeSingle();
+  const logoUrl = schoolLogoUrl(supabase, institution?.logo_path);
   const [bandsResult, classesResult, teachersResult, staffResult] = await Promise.all([
     supabase.from('grade_bands').select('letter, min_score, label').eq('institution_id', institutionId).order('min_score', { ascending: false }),
     supabase.from('classes').select('id, name').eq('institution_id', institutionId).order('name'),
@@ -51,6 +55,12 @@ export default async function ReportCardSetupPage() {
         description="Set the grade scale, assign class teachers, and tag the headmaster. Report cards cannot be printed until the grade scale is set."
         action={<Link href="/report-cards" className="btn btn-ghost">Back to report cards</Link>}
       />
+
+      <GlassCard className="p-6 sm:p-8">
+        <h2 className="mb-2 text-lg font-semibold">School logo</h2>
+        <p className="mb-5 text-sm text-[var(--muted)]">The logo appears at the top of every report card.</p>
+        {canWrite ? <LogoForm currentUrl={logoUrl} /> : <p className="text-sm text-[var(--muted)]">Read only.</p>}
+      </GlassCard>
 
       <GlassCard className="p-6 sm:p-8">
         <h2 className="mb-2 text-lg font-semibold">Grade scale</h2>

@@ -50,7 +50,19 @@ export const reportCardCss = `
 }
 `;
 
-export function ReportCardSection({ card, name, blocked, draft = false }: { card: ReportCardData | null; name: string; blocked: boolean; draft?: boolean }) {
+export function ReportCardSection({
+  card,
+  name,
+  blocked,
+  draft = false,
+  logoUrl = null,
+}: {
+  card: ReportCardData | null;
+  name: string;
+  blocked: boolean;
+  draft?: boolean;
+  logoUrl?: string | null;
+}) {
   if (blocked || !card) {
     return (
       <section className="rc-page">
@@ -61,6 +73,10 @@ export function ReportCardSection({ card, name, blocked, draft = false }: { card
   }
   return (
     <section className="rc-page" aria-label={`Report card for ${card.studentName}`}>
+      {logoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={logoUrl} alt={`${card.school} logo`} style={{ height: 56, width: 'auto', maxWidth: 160, objectFit: 'contain', marginBottom: 8 }} />
+      ) : null}
       <p style={{ margin: 0, fontSize: 12, color: '#55625f' }}>{card.school}</p>
       {draft && <p className="rc-draft">Draft · not yet final</p>}
       <h1>Terminal report · {card.term}</h1>

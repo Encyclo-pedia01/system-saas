@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { PrintButton } from '@/components/report-cards/print-button';
 import { ReportCardSection, reportCardCss, type ReportCardData } from '@/components/report-cards/report-card';
 import { requireEffectiveRole } from '@/lib/auth/viewer';
+import { schoolLogoUrl } from '@/lib/school-logo';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
@@ -34,6 +35,9 @@ export default async function PrintReportCardsPage({ searchParams }: { searchPar
   const studentsQuery = supabase.from('students').select('id, full_name, admission_number, class_id').eq('institution_id', institutionId);
   const { data: students } = await (studentId ? studentsQuery.eq('id', studentId) : studentsQuery.eq('class_id', classId).order('full_name'));
   if (!students || students.length === 0) notFound();
+
+  const { data: institution } = await supabase.from('institutions').select('logo_path').eq('id', institutionId).maybeSingle();
+  const logoUrl = schoolLogoUrl(supabase, institution?.logo_path);
 
   const ids = students.map((s) => s.id);
   const classForMissing = classId || students[0].class_id;
@@ -75,7 +79,7 @@ export default async function PrintReportCardsPage({ searchParams }: { searchPar
 
       <div className="print-area">
         {cards.map(({ key, card, name, blocked }) => (
-          <ReportCardSection key={key} card={card} name={name} blocked={blocked} />
+          <ReportCardSection key={key} card={card} name={name} blocked={blocked} logoUrl={logoUrl} />
         ))}
       </div>
     </main>

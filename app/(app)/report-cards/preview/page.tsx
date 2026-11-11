@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { GlassCard } from '@/components/ui/glass-card';
 import { PageHeader } from '@/components/ui/page-header';
 import { requireEffectiveRole } from '@/lib/auth/viewer';
+import { schoolLogoUrl } from '@/lib/school-logo';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
@@ -29,6 +30,8 @@ export default async function ReportCardPreviewPage({ searchParams }: { searchPa
   const institutionId = viewer.institution!.id;
   const isOwner = viewer.effectiveRole === 'owner';
   const supabase = await createClient();
+  const { data: institution } = await supabase.from('institutions').select('logo_path').eq('id', institutionId).maybeSingle();
+  const logoUrl = schoolLogoUrl(supabase, institution?.logo_path);
 
   const [termsResult, classesResult, membershipResult, myClassesResult] = await Promise.all([
     supabase.from('terms').select('id, name, starts_on').eq('institution_id', institutionId).order('starts_on'),
@@ -135,7 +138,7 @@ export default async function ReportCardPreviewPage({ searchParams }: { searchPa
         <div className="space-y-6">
           <style>{reportCardCss}</style>
           {cards.map(({ key, card, name, blocked, draft }) => (
-            <ReportCardSection key={key} card={card} name={name} blocked={blocked} draft={draft} />
+            <ReportCardSection key={key} card={card} name={name} blocked={blocked} draft={draft} logoUrl={logoUrl} />
           ))}
         </div>
       )}
