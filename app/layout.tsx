@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { JetBrains_Mono } from 'next/font/google';
 import { Suspense, type ReactNode } from 'react';
 
 import { CookieBanner } from '@/components/legal/cookie-banner';
@@ -7,6 +8,9 @@ import { Toaster } from '@/components/ui/toaster';
 import { siteUrl } from '@/lib/env';
 
 import './globals.css';
+
+// Monospace for numbers, IDs and stats. Preloaded by next/font so text does not flash.
+const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono', display: 'swap' });
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
@@ -32,7 +36,7 @@ const themeScript = `(function(){try{var m=document.cookie.match(/(?:^|; )theme=
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en-GB" suppressHydrationWarning>
+    <html lang="en-GB" suppressHydrationWarning className={jetbrainsMono.variable}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

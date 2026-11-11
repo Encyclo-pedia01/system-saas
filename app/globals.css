@@ -114,6 +114,13 @@ body:has(.login-page) {
   background: #ffffff;
 }
 
+/* Numbers, IDs and stats use the monospace face (JetBrains Mono, loaded in layout.tsx). */
+.num,
+.font-mono-numbers {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Inside the app, the footer sits in the main column (see AppShell), not under the sidebar. */
 body:has(.app-shell) > footer {
   display: none;
