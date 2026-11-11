@@ -425,14 +425,6 @@ h3 {
     color: var(--accent);
   }
 
-  .eyebrow::before {
-    content: "";
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 999px;
-    background: var(--highlight);
-  }
-
   /* Tables: scroll sideways on narrow screens, with soft row hover and tabular numbers. */
   .table-wrap {
     overflow-x: auto;
