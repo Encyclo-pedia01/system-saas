@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { revokeInvitationAction } from '@/app/(app)/team/actions';
 import { HeadmasterTagForm } from '@/components/report-cards/report-forms';
 import { InviteMemberForm } from '@/components/team/invite-member-form';
+import { RemoveMemberForm } from '@/components/team/remove-member-form';
 import { EmptyState } from '@/components/ui/empty-state';
 import { GlassCard } from '@/components/ui/glass-card';
 import { PageHeader } from '@/components/ui/page-header';
@@ -121,6 +122,11 @@ export default async function TeamPage() {
                     label={`${staffLabel(member)}${member.role === 'school_admin' ? ' (Encyclopedia)' : ''}`}
                     checked={member.is_headmaster}
                   />
+                  {member.role === 'staff' && (
+                    <div className="mt-3">
+                      <RemoveMemberForm membershipId={member.membership_id} label={staffLabel(member)} />
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>

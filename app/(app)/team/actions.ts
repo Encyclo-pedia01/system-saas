@@ -87,3 +87,22 @@ export async function revokeInvitationAction(formData: FormData): Promise<void> 
 
   revalidatePath('/team');
 }
+
+export async function removeTeamMemberAction(
+  _previous: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await resolveWriteContext(['owner']);
+  if (!guard.ok) return failure(guard.message);
+
+  const membershipId = String(formData.get('membershipId') ?? '');
+  if (!/^[0-9a-f-]{36}$/i.test(membershipId)) return failure('Choose a team member first.');
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('remove_team_member', { p_membership_id: membershipId });
+  if (error) return databaseFailure(error, 'Could not remove this team member.');
+
+  revalidatePath('/team');
+  revalidatePath('/report-cards/setup');
+  return success('Access removed.');
+}
