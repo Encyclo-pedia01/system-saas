@@ -22,12 +22,7 @@ export default async function BackupPage() {
       />
 
       <GlassCard className="space-y-5 p-6 sm:p-8">
-        <div>
-          <h2 className="text-lg font-semibold">Download a backup</h2>
-          <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
-            The file contains your students, classes, groups, subjects, terms, assessments, scores, results, insights, fee records (fee items, charges, and payments), and report card records (grade bands, class teachers, remarks, and final cards), as an Excel workbook (.xlsx) with one sheet per table. It does not include staff passwords or sign-in details.
-          </p>
-        </div>
+        <h2 className="text-lg font-semibold">Download a backup</h2>
 
         {canDownload ? (
           <a href="/backup-export" className="btn-primary inline-flex justify-center" download>
@@ -36,15 +31,6 @@ export default async function BackupPage() {
         ) : (
           <p className="text-sm text-[var(--muted)]">Backups cannot be downloaded in read-only view.</p>
         )}
-
-        <div className="rounded-lg border border-[var(--border)] p-4 text-sm leading-relaxed text-[var(--muted)]">
-          <p className="font-medium text-[var(--text)]">Keep your copies safe</p>
-          <ul className="mt-2 list-disc space-y-1 pl-5">
-            <li>Download a backup at the end of each term, and before any big change.</li>
-            <li>The file contains student names and records. Store it somewhere private, and do not share it.</li>
-            <li>Campus Veritas does not keep automatic copies on the free hosting plan, so your downloads are your safety net.</li>
-          </ul>
-        </div>
       </GlassCard>
     </div>
   );
