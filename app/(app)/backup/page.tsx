@@ -22,7 +22,10 @@ export default async function BackupPage() {
       />
 
       <GlassCard className="space-y-5 p-6 sm:p-8">
-        <h2 className="text-lg font-semibold">Download a backup</h2>
+        <div>
+          <h2 className="text-lg font-semibold">Download a backup</h2>
+          <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">Get a copy of your school’s records as an Excel workbook.</p>
+        </div>
 
         {canDownload ? (
           <a href="/backup-export" className="btn-primary inline-flex justify-center" download>
