@@ -115,7 +115,7 @@ export function StudentUpload({ classes }: { classes: ClassOption[] }) {
                   <tr key={row.line} className={row.issue ? 'bg-[var(--tone-danger-bg)]' : undefined}>
                     <td className="px-3 py-2 text-[var(--muted)]">{row.line}</td>
                     <td className="px-3 py-2">{row.fullName || '—'}</td>
-                    <td className="px-3 py-2">{row.admissionNumber || '—'}</td>
+                    <td className="px-3 py-2 text-[var(--muted)]">Created on save</td>
                     <td className="px-3 py-2">{row.issue ?? <span className="text-[var(--tone-success-text)]">Ready</span>}</td>
                   </tr>
                 ))}
@@ -123,7 +123,7 @@ export function StudentUpload({ classes }: { classes: ClassOption[] }) {
             </table>
           </div>
 
-          <input type="hidden" name="students" value={JSON.stringify(ready.map(({ fullName, admissionNumber }) => ({ fullName, admissionNumber })))} />
+          <input type="hidden" name="students" value={JSON.stringify(ready.map(({ fullName }) => ({ fullName })))} />
           <SubmitButton disabled={ready.length === 0 || !classId || groupMissing} pendingLabel="Importing…">
             Import {ready.length} {ready.length === 1 ? 'student' : 'students'}
           </SubmitButton>

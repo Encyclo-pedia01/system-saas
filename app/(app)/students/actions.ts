@@ -56,29 +56,41 @@ export async function importStudentsAction(
     return failure('This class has no groups, so leave the group empty.');
   }
 
-  const admissionNumbers = parsed.data.students.map((s) => s.admissionNumber);
   const { data: existing, error: existingError } = await supabase
     .from('students')
-    .select('admission_number')
+    .select('full_name')
     .eq('institution_id', institutionId)
-    .in('admission_number', admissionNumbers);
+    .eq('class_id', parsed.data.classId);
 
   if (existingError) return databaseFailure(existingError, 'Could not check existing students.');
 
-  const taken = new Set((existing ?? []).map((row) => row.admission_number.toLowerCase()));
-  const fresh = parsed.data.students.filter((s) => !taken.has(s.admissionNumber.toLowerCase()));
+  // A student is skipped when a student with the same name is already in this class, or repeats in the file.
+  const taken = new Set((existing ?? []).map((row) => (row.full_name as string).trim().toLowerCase()));
+  const fresh = parsed.data.students.filter((student) => {
+    const key = student.fullName.trim().toLowerCase();
+    if (taken.has(key)) return false;
+    taken.add(key);
+    return true;
+  });
 
   if (fresh.length === 0) {
-    return failure('All of these students are already enrolled, so nothing was imported.');
+    return failure('All of these students are already enrolled in this class, so nothing was imported.');
   }
 
+  const { data: numbers, error: numberError } = await supabase.rpc('allocate_admission_numbers', {
+    p_institution_id: institutionId,
+    p_count: fresh.length,
+  });
+  if (numberError) return databaseFailure(numberError, 'Could not create admission numbers. Nothing was saved. Try again.');
+  const admissionNumbers = numbers as string[];
+
   const { error } = await supabase.from('students').insert(
-    fresh.map((s) => ({
+    fresh.map((s, index) => ({
       institution_id: institutionId,
       class_id: parsed.data.classId,
       group_id: parsed.data.groupId,
       full_name: s.fullName,
-      admission_number: s.admissionNumber,
+      admission_number: admissionNumbers[index],
     })),
   );
 
@@ -105,17 +117,23 @@ export async function createStudentAction(
     classId: formData.get('classId'),
     groupId: rawGroup === '' ? null : rawGroup,
     fullName: formData.get('fullName'),
-    admissionNumber: formData.get('admissionNumber'),
   });
   if (!parsed.success) return fromZodError(parsed.error);
 
   const supabase = await createClient();
+  const institutionId = guard.context.institutionId;
+  const { data: numbers, error: numberError } = await supabase.rpc('allocate_admission_numbers', {
+    p_institution_id: institutionId,
+    p_count: 1,
+  });
+  if (numberError) return databaseFailure(numberError, 'Could not create an admission number. Try again.');
+
   const { error } = await supabase.from('students').insert({
-    institution_id: guard.context.institutionId,
+    institution_id: institutionId,
     class_id: parsed.data.classId,
     group_id: parsed.data.groupId,
     full_name: parsed.data.fullName,
-    admission_number: parsed.data.admissionNumber,
+    admission_number: (numbers as string[])[0],
   });
 
   if (error) return databaseFailure(error, 'Could not add the student. The admission number may already be in use.');

@@ -103,7 +103,6 @@ export const studentSchema = z.object({
   classId: z.uuid('Choose a class.'),
   groupId: z.uuid('Choose a group.').nullable(),
   fullName: z.string().trim().min(2, 'Enter the student’s full name.').max(120),
-  admissionNumber: z.string().trim().min(1, 'Enter an admission number.').max(40),
 });
 
 export const importStudentsSchema = z.object({
@@ -113,7 +112,6 @@ export const importStudentsSchema = z.object({
     .array(
       z.object({
         fullName: z.string().trim().min(2).max(120),
-        admissionNumber: z.string().trim().min(1).max(40),
       }),
     )
     .min(1, 'There are no ready rows to import.')

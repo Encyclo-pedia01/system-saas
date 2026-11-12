@@ -55,11 +55,7 @@ export function StudentForm({ classes }: { classes: ClassOption[] }) {
         <input id="fullName" name="fullName" required className="field-input" aria-invalid={Boolean(errors?.fullName)} />
         <FieldError messages={errors?.fullName} />
       </div>
-      <div>
-        <label htmlFor="admissionNumber" className="field-label">Admission number</label>
-        <input id="admissionNumber" name="admissionNumber" required className="field-input" aria-invalid={Boolean(errors?.admissionNumber)} />
-        <FieldError messages={errors?.admissionNumber} />
-      </div>
+      <p className="text-sm text-[var(--muted)]">The admission number is created automatically when you save.</p>
       {state && !state.ok && !state.fieldErrors && <p role="alert" className="form-error">{state.message}</p>}
       <SubmitButton pendingLabel="Adding…">Add student</SubmitButton>
     </form>

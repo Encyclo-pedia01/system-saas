@@ -5,14 +5,12 @@ export const maxRosterRows = 500;
 export type RosterRow = {
   line: number;
   fullName: string;
-  admissionNumber: string;
   issue: string | null;
 };
 
 export type RosterParseResult = { ok: true; rows: RosterRow[] } | { ok: false; message: string };
 
 const nameHeaders = ['fullname', 'name', 'studentname', 'student'];
-const admissionHeaders = ['admissionnumber', 'admissionno', 'admissionnum', 'admission', 'admno'];
 
 function normaliseHeader(value: string): string {
   return value.toLowerCase().replace(/[^a-z]/g, '');
@@ -80,48 +78,32 @@ export async function parseRosterFile(file: File): Promise<RosterParseResult> {
 
   const headers = headerRow.map(normaliseHeader);
   const nameColumn = headers.findIndex((header) => nameHeaders.includes(header));
-  const admissionColumn = headers.findIndex((header) => admissionHeaders.includes(header));
-
-  if (nameColumn === -1 || admissionColumn === -1) {
-    return { ok: false, message: 'The first row must include a Name column and an Admission number column.' };
+  if (nameColumn === -1) {
+    return { ok: false, message: 'The first row must include a Name column.' };
   }
 
   if (dataRows.length > maxRosterRows) {
     return { ok: false, message: `Upload at most ${maxRosterRows} students at a time.` };
   }
 
-  const seen = new Map<string, number>();
   const rows: RosterRow[] = [];
 
   dataRows.forEach((cells, index) => {
     const line = index + 2;
     const fullName = (cells[nameColumn] ?? '').trim();
-    const admissionNumber = (cells[admissionColumn] ?? '').trim();
 
-    if (fullName === '' && admissionNumber === '') {
+    if (fullName === '') {
       return;
     }
 
     let issue: string | null = null;
-    const key = admissionNumber.toLowerCase();
-
     if (fullName.length < 2) {
       issue = 'Name is missing or too short.';
     } else if (fullName.length > 120) {
       issue = 'Name is longer than 120 characters.';
-    } else if (admissionNumber === '') {
-      issue = 'Admission number is missing.';
-    } else if (admissionNumber.length > 40) {
-      issue = 'Admission number is longer than 40 characters.';
-    } else if (seen.has(key)) {
-      issue = `Admission number repeats line ${seen.get(key)}.`;
     }
 
-    if (admissionNumber !== '' && !seen.has(key)) {
-      seen.set(key, line);
-    }
-
-    rows.push({ line, fullName, admissionNumber, issue });
+    rows.push({ line, fullName, issue });
   });
 
   if (rows.length === 0) {
