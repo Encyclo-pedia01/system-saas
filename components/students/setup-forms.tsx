@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react';
 
-import { createSubjectAction, createTermAction } from '@/app/(app)/students/actions';
+import { createSchoolYearAction, createSubjectAction } from '@/app/(app)/students/actions';
 import { FieldError } from '@/components/ui/field-error';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { useActionToast } from '@/components/ui/use-action-toast';
@@ -24,31 +24,20 @@ export function SubjectForm() {
   );
 }
 
-export function TermForm() {
-  const [state, action] = useActionState<ActionResult | null, FormData>(createTermAction, null);
+export function SchoolYearForm() {
+  const [state, action] = useActionState<ActionResult | null, FormData>(createSchoolYearAction, null);
   useActionToast(state);
   const errors = state?.fieldErrors;
 
   return (
     <form action={action} className="space-y-4" noValidate>
+      <p className="text-sm text-[var(--muted)]">Creates 1st, 2nd and 3rd Term for the year. Term 1 runs September to December, Term 2 January to April, and Term 3 April to July.</p>
       <div>
-        <label htmlFor="termName" className="field-label">Term name</label>
-        <input id="termName" name="name" required placeholder="Term 1 2026" className="field-input" aria-invalid={Boolean(errors?.name)} />
-        <FieldError messages={errors?.name} />
+        <label htmlFor="startYear" className="field-label">School year starts in</label>
+        <input id="startYear" name="startYear" type="number" min={2000} max={2100} required placeholder="2026" className="field-input" aria-invalid={Boolean(errors?.startYear)} />
+        <FieldError messages={errors?.startYear} />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label htmlFor="termStart" className="field-label">Starts on</label>
-          <input id="termStart" name="startsOn" type="date" required className="field-input" aria-invalid={Boolean(errors?.startsOn)} />
-          <FieldError messages={errors?.startsOn} />
-        </div>
-        <div>
-          <label htmlFor="termEnd" className="field-label">Ends on</label>
-          <input id="termEnd" name="endsOn" type="date" required className="field-input" aria-invalid={Boolean(errors?.endsOn)} />
-          <FieldError messages={errors?.endsOn} />
-        </div>
-      </div>
-      <SubmitButton variant="ghost" pendingLabel="Adding…">Add term</SubmitButton>
+      <SubmitButton variant="ghost" pendingLabel="Creating…">Create school year</SubmitButton>
     </form>
   );
 }

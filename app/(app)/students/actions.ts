@@ -11,7 +11,6 @@ import {
   importStudentsSchema,
   studentSchema,
   subjectSchema,
-  termSchema,
 } from '@/lib/validation/schemas';
 
 export async function importStudentsAction(
@@ -147,34 +146,79 @@ export async function createSubjectAction(
   return success(`Subject “${parsed.data.name}” created.`);
 }
 
-export async function createTermAction(
+export async function createSchoolYearAction(
   _previous: ActionResult | null,
   formData: FormData,
 ): Promise<ActionResult> {
   const guard = await resolveWriteContext(['owner']);
   if (!guard.ok) return failure(guard.message);
 
-  const parsed = termSchema.safeParse({
-    name: formData.get('name'),
-    startsOn: formData.get('startsOn'),
-    endsOn: formData.get('endsOn'),
-  });
-  if (!parsed.success) return fromZodError(parsed.error);
+  const startYear = Number(formData.get('startYear'));
+  if (!Number.isInteger(startYear) || startYear < 2000 || startYear > 2100) {
+    return failure('Enter the year the school year starts, for example 2026.');
+  }
 
   const supabase = await createClient();
-  const { error } = await supabase.from('terms').insert({
-    institution_id: guard.context.institutionId,
-    name: parsed.data.name,
-    starts_on: parsed.data.startsOn,
-    ends_on: parsed.data.endsOn,
+  const { error } = await supabase.rpc('create_school_year', {
+    p_institution_id: guard.context.institutionId,
+    p_start_year: startYear,
   });
 
-  if (error) return databaseFailure(error, 'Could not create the term. Check the dates and try again.');
+  if (error) return databaseFailure(error, 'Could not set up this school year. It may already exist.');
 
   revalidatePath('/students');
   revalidatePath('/scores');
   revalidatePath('/grading');
-  return success(`Term “${parsed.data.name}” created.`);
+  return success(`${startYear}/${String((startYear + 1) % 100).padStart(2, '0')} school year created with three terms.`);
+}
+
+export async function setClassSubjectsAction(
+  _previous: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const guard = await resolveWriteContext(['owner']);
+  if (!guard.ok) return failure(guard.message);
+
+  const classId = String(formData.get('classId') ?? '');
+  if (!/^[0-9a-f-]{36}$/i.test(classId)) return failure('Choose a class first.');
+
+  const wanted = new Set(
+    formData.getAll('subjectId').map(String).filter((id) => /^[0-9a-f-]{36}$/i.test(id)),
+  );
+
+  const supabase = await createClient();
+  const institutionId = guard.context.institutionId;
+  const { data: current, error: readError } = await supabase
+    .from('class_subjects')
+    .select('subject_id')
+    .eq('institution_id', institutionId)
+    .eq('class_id', classId);
+  if (readError) return databaseFailure(readError, 'Could not read the class subjects.');
+
+  const existing = new Set((current ?? []).map((row) => row.subject_id as string));
+  const toRemove = [...existing].filter((id) => !wanted.has(id));
+  const toAdd = [...wanted].filter((id) => !existing.has(id));
+
+  if (toRemove.length > 0) {
+    const { error } = await supabase
+      .from('class_subjects')
+      .delete()
+      .eq('institution_id', institutionId)
+      .eq('class_id', classId)
+      .in('subject_id', toRemove);
+    if (error) return databaseFailure(error, 'Could not remove a subject from this class.');
+  }
+
+  if (toAdd.length > 0) {
+    const { error } = await supabase
+      .from('class_subjects')
+      .insert(toAdd.map((subjectId) => ({ institution_id: institutionId, class_id: classId, subject_id: subjectId })));
+    if (error) return databaseFailure(error, 'Could not add the subjects to this class.');
+  }
+
+  revalidatePath('/students');
+  revalidatePath('/scores');
+  return success('Subjects saved for this class.');
 }
 
 export async function createSuggestedSubjectAction(

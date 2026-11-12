@@ -3,7 +3,8 @@ import Link from 'next/link';
 
 import { StudentForm, type ClassOption } from '@/components/students/student-forms';
 import { StudentUpload } from '@/components/students/student-upload';
-import { SubjectForm, TermForm } from '@/components/students/setup-forms';
+import { SubjectForm, SchoolYearForm } from '@/components/students/setup-forms';
+import { ClassSubjectsForm } from '@/components/students/class-subjects-form';
 import { StudentProfileCard } from '@/components/students/student-profile-card';
 import { SuggestedSubjects } from '@/components/students/suggested-subjects';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -26,13 +27,16 @@ export default async function StudentsPage() {
   const canStructure = viewer.effectiveRole === 'owner' && !viewer.readOnly;
   const canEnrol = (viewer.effectiveRole === 'owner' || viewer.effectiveRole === 'school_admin') && !viewer.readOnly;
 
-  const [classesResult, groupsResult, studentsResult, subjectsResult] = await Promise.all([
+  const [classesResult, groupsResult, studentsResult, subjectsResult, classSubjectsResult] = await Promise.all([
     supabase.from('classes').select('id, name, has_groups').eq('institution_id', institutionId).order('name'),
     supabase.from('class_groups').select('id, class_id, name').eq('institution_id', institutionId).order('name'),
     supabase.from('students').select('id, class_id, group_id, full_name, admission_number').eq('institution_id', institutionId).order('full_name'),
-    supabase.from('subjects').select('name').eq('institution_id', institutionId),
+    supabase.from('subjects').select('id, name').eq('institution_id', institutionId).order('name'),
+    supabase.from('class_subjects').select('class_id, subject_id').eq('institution_id', institutionId),
   ]);
-  const existingSubjects = new Set((subjectsResult.data ?? []).map((subject) => subject.name.trim().toLowerCase()));
+  const allSubjects = (subjectsResult.data ?? []) as Array<{ id: string; name: string }>;
+  const classSubjectRows = (classSubjectsResult.data ?? []) as Array<{ class_id: string; subject_id: string }>;
+  const existingSubjects = new Set(allSubjects.map((subject) => subject.name.trim().toLowerCase()));
   const suggestedGroups = (classLevels as readonly ClassLevel[])
     .map((level) => ({
       level,
@@ -77,12 +81,30 @@ export default async function StudentsPage() {
         <div className="grid gap-6 lg:grid-cols-2">
           <GlassCard className="p-6"><h2 className="mb-1 text-lg font-semibold">Suggested subjects</h2><p className="mb-4 text-sm text-[var(--muted)]">Tap a subject to add it. Nothing is added until you tap.</p><SuggestedSubjects groups={suggestedGroups} /></GlassCard>
           <GlassCard className="p-6"><h2 className="mb-4 text-lg font-semibold">Add a subject</h2><SubjectForm /></GlassCard>
-          <GlassCard className="p-6"><h2 className="mb-4 text-lg font-semibold">Add a term</h2><TermForm /></GlassCard>
+          <GlassCard className="p-6"><h2 className="mb-4 text-lg font-semibold">Set up a school year</h2><SchoolYearForm /></GlassCard>
         </div>
       )}
 
+      {canStructure && classes.length > 0 && (
+        <GlassCard className="p-6">
+          <h2 className="mb-1 text-lg font-semibold">Subjects by class</h2>
+          <p className="mb-5 text-sm text-[var(--muted)]">Students enrolled in a class get its subjects automatically. Changes apply to students already in the class.</p>
+          <div className="grid gap-6">
+            {classes.map((schoolClass) => (
+              <ClassSubjectsForm
+                key={schoolClass.id}
+                classId={schoolClass.id}
+                className={schoolClass.name}
+                subjects={allSubjects}
+                selectedIds={classSubjectRows.filter((row) => row.class_id === schoolClass.id).map((row) => row.subject_id)}
+              />
+            ))}
+          </div>
+        </GlassCard>
+      )}
+
       <div className="grid gap-5 lg:grid-cols-2">
-        {classes.length === 0 && <div className="lg:col-span-2"><EmptyState title="No classes yet">Add a class to start enrolling students.</EmptyState></div>}
+        {classes.length === 0 &&  <div className="lg:col-span-2"><EmptyState title="No classes yet">Add a class to start enrolling students.</EmptyState></div>}
         {classes.map((schoolClass) => {
           const members = students.filter((s) => s.class_id === schoolClass.id);
           return (
