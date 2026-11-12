@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 import { revokeInvitationAction } from '@/app/(app)/team/actions';
+import { HeadmasterTagForm } from '@/components/report-cards/report-forms';
 import { InviteMemberForm } from '@/components/team/invite-member-form';
 import { EmptyState } from '@/components/ui/empty-state';
 import { GlassCard } from '@/components/ui/glass-card';
@@ -41,6 +42,14 @@ export default async function TeamPage() {
 
   const members = membersResult.data ?? [];
   const pending = (invitesResult.data ?? []).filter((invite) => new Date(invite.expires_at) > new Date());
+
+  // Only the owner can tag a headmaster. The list shows names and emails, as on the report card setup page.
+  const isOwner = viewer.effectiveRole === 'owner';
+  const staffResult = isOwner && !viewer.readOnly ? await supabase.rpc('list_school_staff', { p_institution_id: institutionId }) : null;
+  const staff = ((staffResult?.data ?? []) as Array<{ membership_id: string; full_name: string; email: string; role: string; is_headmaster: boolean }>).filter(
+    (member) => member.role === 'staff' || member.role === 'school_admin',
+  );
+  const staffLabel = (member: { full_name: string; email: string }) => member.full_name || member.email || 'Team member';
 
   return (
     <div className="space-y-8">
@@ -94,6 +103,30 @@ export default async function TeamPage() {
           )}
         </GlassCard>
       </div>
+
+      {isOwner && !viewer.readOnly && (
+        <GlassCard className="p-6 sm:p-8">
+          <h2 className="mb-2 text-lg font-semibold">Headmaster</h2>
+          <p className="mb-5 text-sm text-[var(--muted)]">
+            A team member tagged as headmaster can write the headmaster remark for every class. You can always write it yourself.
+          </p>
+          {staff.length === 0 ? (
+            <EmptyState title="No teachers have joined yet">Accepted invitations appear here.</EmptyState>
+          ) : (
+            <ul className="divide-y divide-[var(--border)]">
+              {staff.map((member) => (
+                <li key={member.membership_id} className="py-4">
+                  <HeadmasterTagForm
+                    membershipId={member.membership_id}
+                    label={`${staffLabel(member)}${member.role === 'school_admin' ? ' (Encyclopedia)' : ''}`}
+                    checked={member.is_headmaster}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </GlassCard>
+      )}
     </div>
   );
 }
