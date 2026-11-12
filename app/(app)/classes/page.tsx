@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { AddClassForm, EditClassForm, TeacherRow, type ClassRecord, type StaffOption } from '@/components/classes/class-forms';
 import { EmptyState } from '@/components/ui/empty-state';
 import { GlassCard } from '@/components/ui/glass-card';
+import { RefreshAt } from '@/components/ui/refresh-at';
 import { PageHeader } from '@/components/ui/page-header';
 import { requireEffectiveRole } from '@/lib/auth/viewer';
 import { createClient } from '@/lib/supabase/server';
@@ -36,6 +37,7 @@ export default async function ClassesPage() {
         .eq('kind', 'class_teacher')
         .is('accepted_at', null)
         .is('revoked_at', null)
+        .gt('expires_at', new Date().toISOString())
     : { data: [] };
 
   const staffResult = isOwner ? await supabase.rpc('list_school_staff', { p_institution_id: institutionId }) : { data: [] };
@@ -55,6 +57,8 @@ export default async function ClassesPage() {
     const member = staffRows.find((row) => row.user_id === userId);
     return member ? member.full_name || member.email : 'Teacher';
   };
+
+  const nextInviteExpiry = invites.reduce<string | null>((earliest, invite) => (!earliest || invite.expires_at < earliest ? invite.expires_at : earliest), null);
 
   const records: ClassRecord[] = classes.map((schoolClass) => {
     const teacher = teachers.find((row) => row.class_id === schoolClass.id);
@@ -81,6 +85,7 @@ export default async function ClassesPage() {
 
   return (
     <div className="space-y-8">
+      <RefreshAt at={nextInviteExpiry} />
       <PageHeader backHref="/dashboard"
         eyebrow="Records"
         title="Classes"

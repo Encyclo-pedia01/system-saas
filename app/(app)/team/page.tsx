@@ -5,6 +5,7 @@ import { HeadmasterTagForm } from '@/components/report-cards/report-forms';
 import { InviteMemberForm } from '@/components/team/invite-member-form';
 import { RemoveMemberForm } from '@/components/team/remove-member-form';
 import { EmptyState } from '@/components/ui/empty-state';
+import { RefreshAt } from '@/components/ui/refresh-at';
 import { GlassCard } from '@/components/ui/glass-card';
 import { PageHeader } from '@/components/ui/page-header';
 import { SubmitButton } from '@/components/ui/submit-button';
@@ -38,11 +39,14 @@ export default async function TeamPage() {
       .eq('role', 'staff')
       .is('accepted_at', null)
       .is('revoked_at', null)
+      .gt('expires_at', new Date().toISOString())
       .order('created_at', { ascending: false }),
   ]);
 
   const members = membersResult.data ?? [];
-  const pending = (invitesResult.data ?? []).filter((invite) => new Date(invite.expires_at) > new Date());
+  const now = new Date();
+  const pending = (invitesResult.data ?? []).filter((invite) => new Date(invite.expires_at) > now);
+  const nextExpiry = pending.reduce<string | null>((earliest, invite) => (!earliest || invite.expires_at < earliest ? invite.expires_at : earliest), null);
 
   // Only the owner can tag a headmaster. The list shows names and emails, as on the report card setup page.
   const isOwner = viewer.effectiveRole === 'owner';
@@ -82,6 +86,7 @@ export default async function TeamPage() {
 
         <GlassCard className="p-6">
           <h2 className="mb-4 text-lg font-semibold">Pending invitations</h2>
+          <RefreshAt at={nextExpiry} />
           {pending.length === 0 ? (
             <EmptyState title="No pending invitations">Invitations you send appear here until they are accepted.</EmptyState>
           ) : (
